@@ -1,0 +1,58 @@
+[
+    {
+        "name": "ideal gas law for meteorology",
+        "left": [
+            {
+                "name": "pressure",
+                "sign": "+",
+                "value": "p"
+            }
+        ],
+        "right": [
+            {
+                "name": "density, specific gas constant, temperature",
+                "sign": "+",
+                "value": "\\rho R T"
+            }
+        ]
+    },
+    {
+        "name": "hydrostatic equation",
+        "left": [
+            {
+                "name": "vertical pressure gradient",
+                "sign": "+",
+                "value": "\\frac{\\operatorname{d} p}{\\operatorname{d} z"
+            }
+        ],
+        "right": [
+            {
+                "name": "density, gravitational acceleration",
+                "sign": "-",
+                "value": "\\rho g"
+            }
+        ]
+    },
+    {
+        "name": "first law of thermodynamics",
+        "left": [
+            {
+                "name": "total differential of inner energy",
+                "sign": "+",
+                "value": "\\operatorname{d} U"
+            }
+        ],
+        "right": [
+            {
+                "name": "partial differential of heat",
+                "sign": "+",
+                "value": "\\partial Q"
+            },
+            {
+                "name": "partial differential of work",
+                "sign": "+",
+                "value": "\\partial W"
+            }
+        ]
+    }
+]
