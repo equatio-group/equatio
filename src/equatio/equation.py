@@ -20,8 +20,8 @@ class EquationSet:
 
     @staticmethod
     def from_json(filename: str) -> "EquationSet":
-        with open(filename, "r") as file:
-            equations = json.load(file)
+        with open(filename, "r") as f:
+            equations = json.load(f)
         return EquationSet(equations)
 
 
@@ -54,7 +54,10 @@ class Equation:
         return all(
             [
                 self_term == test_term
-                for self_term, test_term in zip(self_side, test_side)]
+                for self_term, test_term in zip(
+                self_side, sorted(test_side, key=lambda term: term.value)
+            )
+            ]
         )
 
 
