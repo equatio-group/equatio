@@ -38,7 +38,8 @@ class Equation:
 
     def check_input(self, test_left: list["Term"], test_right: list["Term"]) -> bool:
         return (
-                self._check_side(self.left, test_left) and self._check_side(self.right, test_right)
+                self._check_side(self.left, test_left)
+                and self._check_side(self.right, test_right)
         )
 
     def as_dict(self) -> dict:
@@ -51,7 +52,9 @@ class Equation:
     @staticmethod
     def _check_side(self_side: list["Term"], test_side: list["Term"]) -> bool:
         return all(
-            [self_term == test_term for self_term, test_term in zip(self_side, test_side)]
+            [
+                self_term == test_term
+                for self_term, test_term in zip(self_side, test_side)]
         )
 
 
@@ -90,16 +93,45 @@ class Term:
 if __name__ == "__main__":
     PROJECT_ROOT = Path(__file__).resolve().parents[2]
     JSON_TEST_PATH = PROJECT_ROOT / "data" / "equations.json"
-    p = Term("pressure", "p", "+")
-    rho_R_T = Term("density, specific gas constant, temperature", r"\rho R T", "+")
-    ideal_gas_law_meteo = Equation("ideal gas law for meteorology", [p], [rho_R_T])
-    dp_dz = Term("vertical pressure gradient", r"\frac{\operatorname{d} p}{\operatorname{d} z", "+")
-    rho_g = Term("density, gravitational acceleration", r"\rho g", "-")
-    hydrostatic_equation = Equation("hydrostatic equation", [dp_dz], [rho_g])
-    dU = Term("total differential of inner energy", r"\operatorname{d} U", "+")
-    delQ = Term("partial differential of heat", r"\partial Q", "+")
-    delW = Term("partial differential of work", r"\partial W", "+")
-    first_law = Equation("first law of thermodynamics", [dU], [delQ, delW])
+    p = Term("pressure",
+             "p",
+             "+")
+    rho_R_T = Term(
+        "density, specific gas constant, temperature",
+        r"\rho R T",
+        "+")
+    ideal_gas_law_meteo = Equation(
+        "ideal gas law for meteorology",
+        [p],
+        [rho_R_T])
+    dp_dz = Term(
+        "vertical pressure gradient",
+        r"\frac{\operatorname{d} p}{\operatorname{d} z",
+        "+")
+    rho_g = Term(
+        "density, gravitational acceleration",
+        r"\rho g",
+        "-")
+    hydrostatic_equation = Equation(
+        "hydrostatic equation",
+        [dp_dz],
+        [rho_g])
+    dU = Term(
+        "total differential of inner energy",
+        r"\operatorname{d} U",
+        "+")
+    delQ = Term(
+        "partial differential of heat",
+        r"\partial Q",
+        "+")
+    delW = Term(
+        "partial differential of work",
+        r"\partial W",
+        "+")
+    first_law = Equation(
+        "first law of thermodynamics",
+        [dU],
+        [delQ, delW])
     my_equations = EquationSet([ideal_gas_law_meteo, hydrostatic_equation, first_law])
     my_equations.to_json(JSON_TEST_PATH)
     with JSON_TEST_PATH.open("r") as file:
