@@ -31,7 +31,7 @@ class EquationSet:
 
 
 class Equation:
-    """An equation divided into left and right part"""
+    """An equation with terms divided into left and right part"""
 
     def __init__(self, name: str, left: list["Term"], right: list["Term"]) -> None:
         self.name = name
