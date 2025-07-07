@@ -6,10 +6,15 @@ class EquationSet:
     """A collection of equation objects"""
 
     def __init__(self, equations: list["Equation"]) -> None:
-        self.equations = equations
+        self.equations = sorted(equations, key=lambda equation: equation.name)
 
-    def add_equation(self, equation: "Equation") -> None:
-        self.equations.append(equation)
+    def __eq__(self, other: "EquationSet") -> bool:
+        # Currently only works if other has the right equation names
+        return self.equations == other.equations
+
+    def add_equation(self, new_equation: "Equation") -> None:
+        self.equations.append(new_equation)
+        self.equations = sorted(self.equations, key=lambda equation: equation.name)
 
     def remove_equation(self, equation: "Equation") -> None:
         self.equations.remove(equation)

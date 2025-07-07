@@ -1,18 +1,23 @@
 [
     {
-        "name": "ideal gas law for meteorology",
+        "name": "first law of thermodynamics",
         "left": [
             {
-                "name": "pressure",
+                "name": "total differential of inner energy",
                 "sign": "+",
-                "value": "p"
+                "value": "\\operatorname{d} U"
             }
         ],
         "right": [
             {
-                "name": "density, specific gas constant, temperature",
+                "name": "partial differential of heat",
                 "sign": "+",
-                "value": "\\rho R T"
+                "value": "\\partial Q"
+            },
+            {
+                "name": "partial differential of work",
+                "sign": "+",
+                "value": "\\partial W"
             }
         ]
     },
@@ -34,24 +39,19 @@
         ]
     },
     {
-        "name": "first law of thermodynamics",
+        "name": "ideal gas law for meteorology",
         "left": [
             {
-                "name": "total differential of inner energy",
+                "name": "pressure",
                 "sign": "+",
-                "value": "\\operatorname{d} U"
+                "value": "p"
             }
         ],
         "right": [
             {
-                "name": "partial differential of heat",
+                "name": "density, specific gas constant, temperature",
                 "sign": "+",
-                "value": "\\partial Q"
-            },
-            {
-                "name": "partial differential of work",
-                "sign": "+",
-                "value": "\\partial W"
+                "value": "\\rho R T"
             }
         ]
     }
