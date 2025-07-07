@@ -67,7 +67,7 @@ class Equation:
 
 
 class Term:
-    """Part of an Equation and I used a token"""
+    """Part of an Equation"""
 
     def __init__(self, name: str, value: str, sign: str = "+") -> None:
         self.name = name
