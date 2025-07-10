@@ -30,13 +30,15 @@ class EquationSet:
         self.equations.remove(equation)
 
     def to_json(self, json_file: Path) -> None:
+        # TODO: include name in JSON
         with json_file.open("w") as f:
             json.dump([equation.as_dict() for equation in self.equations], f, indent=4)
 
     @staticmethod
-    def from_json(filename: str, name:str = DEFAULT_NAME) -> "EquationSet":
-        with open(filename, "r") as f:
-            equations = json.load(f)
+    def from_json(filepath: Path, name:str = DEFAULT_NAME) -> "EquationSet":
+        # TODO: include name in JSON
+        with filepath.open("r") as f:
+            equations = [Equation.from_dict(elem) for elem in json.load(f)]
         return EquationSet(equations, name)
 
 
@@ -71,6 +73,14 @@ class Equation:
             "left": [term.as_dict() for term in self.left],
             "right": [term.as_dict() for term in self.right],
         }
+
+    @staticmethod
+    def from_dict(data: dict) -> "Equation":
+        return Equation(
+            data["name"],
+            [Term.from_dict(elem) for elem in data["left"]],
+            [Term.from_dict(elem) for elem in data["right"]],
+        )
 
     @staticmethod
     def _check_side(self_side: list["Term"], test_side: list["Term"]) -> bool:
@@ -172,3 +182,6 @@ if __name__ == "__main__":
     with JSON_TEST_PATH.open("r") as file:
         json_data = json.load(file)
         print(json_data)
+    my_new_equations = EquationSet.from_json(JSON_TEST_PATH, "new_equations")
+    print(my_new_equations)
+    print(my_equations == my_new_equations)  # FIXME: should return True...
