@@ -12,11 +12,11 @@ class EquationSet:
         self.equations = sorted(equations, key=lambda equation: equation.name)
 
     def __repr__(self) -> str:
-        return (f"EquationSet(\"{self.name}\", "
-                + f"containing {len(self.equations)} equations: "
-                + ", ".join(equation.name for equation in self.equations)
-                + ")"
-                )
+        eq_names = ", ".join(equation.name for equation in self.equations)
+        return (
+            f'EquationSet("{self.name}", containing {len(self.equations)} '
+            f"equations: {eq_names})"
+        )
 
     def __eq__(self, other: "EquationSet") -> bool:
         # Currently only works if other has the right equation names
@@ -35,7 +35,7 @@ class EquationSet:
             json.dump([equation.as_dict() for equation in self.equations], f, indent=4)
 
     @staticmethod
-    def from_json(filepath: Path, name:str = DEFAULT_NAME) -> "EquationSet":
+    def from_json(filepath: Path, name: str = DEFAULT_NAME) -> "EquationSet":
         # TODO: include name in JSON
         with filepath.open("r") as f:
             equations = [Equation.from_dict(elem) for elem in json.load(f)]
@@ -51,24 +51,20 @@ class Equation:
         self.right = sorted(right, key=lambda term: term.value)
 
     def __repr__(self) -> str:
-        return (f"Equation(\"{self.name}\": "
-                + " ".join(str(term) for term in self.left)
-                + " = "
-                + " ".join(str(term) for term in self.right)
-                + ")"
-                )
+        left_terms = " ".join(str(term) for term in self.left)
+        right_terms = " ".join(str(term) for term in self.right)
+        return f'Equation("{self.name}": {left_terms} = {right_terms})'
 
     def get_all_terms(self) -> list["Term"]:
         return self.left + self.right
 
     def check_input(self, test_left: list["Term"], test_right: list["Term"]) -> bool:
-        return (
-                self._check_side(self.left, test_left)
-                and self._check_side(self.right, test_right)
+        return self._check_side(self.left, test_left) and self._check_side(
+            self.right, test_right
         )
 
     def as_dict(self) -> dict:
-        return{
+        return {
             "name": self.name,
             "left": [term.as_dict() for term in self.left],
             "right": [term.as_dict() for term in self.right],
@@ -88,8 +84,8 @@ class Equation:
             [
                 self_term == test_term
                 for self_term, test_term in zip(
-                self_side, sorted(test_side, key=lambda term: term.value)
-            )
+                    self_side, sorted(test_side, key=lambda term: term.value)
+                )
             ]
         )
 
@@ -102,11 +98,11 @@ class Term:
         if sign in ("+", "-"):
             self.sign = sign
         else:
-            raise ValueError("Invalid sign. Must be \"+\" (plus) or \"-\" (minus).")
+            raise ValueError('Invalid sign. Must be "+" (plus) or "-" (minus).')
         self.value = value
 
     def __repr__(self) -> str:
-        return f"Term(\"{self.name}\": {self.sign} {self.value})"
+        return f'Term("{self.name}": {self.sign} {self.value})'
 
     def __str__(self) -> str:
         return f"{self.sign} {self.value}"
@@ -135,45 +131,20 @@ class Term:
 if __name__ == "__main__":
     PROJECT_ROOT = Path(__file__).resolve().parents[2]
     JSON_TEST_PATH = PROJECT_ROOT / "data" / "equations.json"
-    p = Term("pressure",
-             "p",
-             "+")
-    rho_R_T = Term(
-        "density, specific gas constant, temperature",
-        r"\rho R T",
-        "+")
-    ideal_gas_law_meteo = Equation(
-        "ideal gas law for meteorology",
-        [p],
-        [rho_R_T])
+    p = Term("pressure", "p", "+")
+    rho_R_T = Term("density, specific gas constant, temperature", r"\rho R T", "+")
+    ideal_gas_law_meteo = Equation("ideal gas law for meteorology", [p], [rho_R_T])
     dp_dz = Term(
         "vertical pressure gradient",
         r"\frac{\operatorname{d} p}{\operatorname{d} z",
-        "+")
-    rho_g = Term(
-        "density, gravitational acceleration",
-        r"\rho g",
-        "-")
-    hydrostatic_equation = Equation(
-        "hydrostatic equation",
-        [dp_dz],
-        [rho_g])
-    dU = Term(
-        "total differential of inner energy",
-        r"\operatorname{d} U",
-        "+")
-    delQ = Term(
-        "partial differential of heat",
-        r"\partial Q",
-        "+")
-    delW = Term(
-        "partial differential of work",
-        r"\partial W",
-        "+")
-    first_law = Equation(
-        "first law of thermodynamics",
-        [dU],
-        [delQ, delW])
+        "+",
+    )
+    rho_g = Term("density, gravitational acceleration", r"\rho g", "-")
+    hydrostatic_equation = Equation("hydrostatic equation", [dp_dz], [rho_g])
+    dU = Term("total differential of inner energy", r"\operatorname{d} U", "+")
+    delQ = Term("partial differential of heat", r"\partial Q", "+")
+    delW = Term("partial differential of work", r"\partial W", "+")
+    first_law = Equation("first law of thermodynamics", [dU], [delQ, delW])
     my_equations = EquationSet([ideal_gas_law_meteo, hydrostatic_equation, first_law])
     print(my_equations)
     for eq in my_equations.equations:
