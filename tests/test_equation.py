@@ -1,8 +1,9 @@
 from pickle import FALSE
 
 import pytest
+from copy import deepcopy
 
-from src.equatio.equation import Term, Equation
+from src.equatio.equation import Term, Equation, EquationSet
 
 # Test Terms and their corresponding dictionaries
 t_p1 = Term("pressure", "p", "+")
@@ -95,7 +96,7 @@ def test_term_from_dict(t_dict: dict[str, str], t: Term) -> None:
     assert t.from_dict(t_dict) == t
 
 
-# Test equations
+# Test equations and their corresponding dictionaries
 # ideal gas law for meteorology
 p = Term("pressure", "p", "+")
 rho_R_T = Term("density, specific gas constant, temperature", r"\rho R T", "+")
@@ -210,3 +211,82 @@ def test_equation_as_dict(e: Equation, e_dict: dict, result: bool) -> None:
 )
 def test_equation_from_dict(e_dict: dict, e: Equation, result: bool) -> None:
     assert result == (Equation.from_dict(e_dict) == e)
+
+# Test EquationSets
+one_equation_set = EquationSet([gas_law], "one term set")
+same_one_equation_set = EquationSet([gas_law])  # with default name
+other_one_equation_set = EquationSet([first_law], "other one term set")
+false_two_equation_set = EquationSet([first_law, first_law_other_order], "one term set")  # should only yield one equation in set
+very_basic_equation_set = EquationSet([gas_law, hydrostatic], "basic equations")
+very_basic_equation_set_other_way_round = EquationSet([hydrostatic, gas_law], "basic equations")
+basic_equation_set = EquationSet([gas_law, hydrostatic, first_law], "basic equations")
+
+@pytest.mark.parametrize(
+    "es1, es2, result",
+    [
+        (one_equation_set, one_equation_set, True),
+        (one_equation_set, same_one_equation_set, True),
+        (other_one_equation_set, false_two_equation_set, True),
+        (one_equation_set, other_one_equation_set, False),
+        (very_basic_equation_set, very_basic_equation_set_other_way_round, True),
+        (very_basic_equation_set, basic_equation_set, False),
+    ]
+)
+def test_equation_set_equality(es1: EquationSet, es2: EquationSet, result: bool) -> None:
+    assert result == (es1 == es2)
+
+@pytest.mark.parametrize(
+    "es, e",
+    [
+        (one_equation_set, hydrostatic),
+        (very_basic_equation_set, first_law),
+        (basic_equation_set, hydrostatic_wrong_sides),
+    ]
+)
+def test_equation_set_add_remove_cycle(es: EquationSet, e: Equation) -> None:
+    new_es: EquationSet = deepcopy(es)
+    new_es.add_equation(e)
+    new_es.remove_equation(e)
+    assert es == new_es
+
+@pytest.mark.parametrize(
+    "es, e",
+    [
+        (one_equation_set, gas_law),
+        (very_basic_equation_set, hydrostatic),
+        (basic_equation_set, first_law),
+    ]
+)
+def test_equation_set_remove_add_cycle(es: EquationSet, e: Equation) -> None:
+    new_es: EquationSet = deepcopy(es)
+    new_es.remove_equation(e)
+    new_es.add_equation(e)
+    assert es == new_es
+
+@pytest.mark.parametrize(
+    "es, e_to_remove, es_new",
+    [
+        (very_basic_equation_set, hydrostatic, one_equation_set),
+        (basic_equation_set, first_law, very_basic_equation_set),
+        (basic_equation_set, first_law, very_basic_equation_set_other_way_round),
+    ]
+)
+def test_equation_set_remove(es: EquationSet, e_to_remove: Equation, es_new: EquationSet) -> None:
+    es_removed: EquationSet = deepcopy(es)
+    es_removed.remove_equation(e_to_remove)
+    assert es_removed == es_new
+
+@pytest.mark.parametrize(
+    "es, e_to_add, es_new",
+    [
+        (one_equation_set, hydrostatic, very_basic_equation_set),
+        (very_basic_equation_set, first_law, basic_equation_set),
+        (very_basic_equation_set_other_way_round, first_law, basic_equation_set),
+    ]
+)
+def test_equation_set_add(es: EquationSet, e_to_add: Equation, es_new: EquationSet) -> None:
+    es_added: EquationSet = deepcopy(es)
+    es_added.add_equation(e_to_add)
+    assert es_added == es_new
+
+# TODO: test JSON import/export
