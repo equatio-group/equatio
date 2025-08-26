@@ -1,7 +1,3 @@
-from pygame.examples.sprite_texture import running
-
-if __name__ == '__main__':
-    print("equatio!")
 
 #hiier kommt die py.game Umgebung
 
