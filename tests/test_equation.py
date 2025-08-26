@@ -1,6 +1,6 @@
 import pytest
 
-from src.equatio.equation import Term
+from src.equatio.equation import Term, Equation
 
 # Test Terms and their corresponding dictionaries
 t_p1 = Term("pressure", "p", "+")
@@ -12,7 +12,7 @@ t_p1_dict = {
 t_p2 = Term("more_pressure", "p", "+")
 t_p2_dict = {
     "name": "more_pressure",
-    "sign": "+",
+    # no sign to check if default works
     "value": "p",
 }
 t_p3 = Term("pressure", "p", "-")
@@ -69,7 +69,7 @@ def test_term_dict_cycle(t: Term) -> None:
     "t, t_dict",
     [
         (t_p1, t_p1_dict),
-        (t_p2, t_p2_dict),
+        # no test for case 2 because dict does not use sign (to test for default value)
         (t_p3, t_p3_dict),
         (t_p4, t_p4_dict),
     ],
