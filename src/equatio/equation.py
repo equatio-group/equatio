@@ -9,7 +9,12 @@ class EquationSet:
 
     def __init__(self, equations: list["Equation"], name: str = DEFAULT_NAME) -> None:
         self.name = name
-        self.equations = sorted(equations, key=lambda equation: equation.name)
+        unique_equations = []
+        for equation in equations:  # uses Equation.__eq__ to check
+            if equation not in unique_equations:
+                unique_equations.append(equation)
+        self.equations = sorted(unique_equations, key=lambda equation: equation.name)
+        # TODO: are empty EquationSets allowed?
 
     def __repr__(self) -> str:
         eq_names = ", ".join(equation.name for equation in self.equations)
@@ -28,6 +33,7 @@ class EquationSet:
 
     def remove_equation(self, equation: "Equation") -> None:
         self.equations.remove(equation)
+        # TODO: raise error if equation is not in set?
 
     def to_json(self, json_file: Path) -> None:
         # TODO: include name in JSON
@@ -49,6 +55,7 @@ class Equation:
         self.name = name
         self.left = sorted(left, key=lambda term: term.value)
         self.right = sorted(right, key=lambda term: term.value)
+        # TODO: check that left and right side are not empty (or default to zero-term?)
 
     def __repr__(self) -> str:
         left_terms = " ".join(str(term) for term in self.left)
