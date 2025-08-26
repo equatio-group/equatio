@@ -5,8 +5,18 @@ from pathlib import Path
 class EquationSet:
     """A collection of equation objects"""
 
-    def __init__(self, equations: list["Equation"]) -> None:
+    DEFAULT_NAME = "MyEquations"
+
+    def __init__(self, equations: list["Equation"], name: str = DEFAULT_NAME) -> None:
+        self.name = name
         self.equations = sorted(equations, key=lambda equation: equation.name)
+
+    def __repr__(self) -> str:
+        return (f"EquationSet(\"{self.name}\", "
+                + f"containing {len(self.equations)} equations: "
+                + ", ".join(equation.name for equation in self.equations)
+                + ")"
+                )
 
     def __eq__(self, other: "EquationSet") -> bool:
         # Currently only works if other has the right equation names
@@ -20,14 +30,16 @@ class EquationSet:
         self.equations.remove(equation)
 
     def to_json(self, json_file: Path) -> None:
+        # TODO: include name in JSON
         with json_file.open("w") as f:
             json.dump([equation.as_dict() for equation in self.equations], f, indent=4)
 
     @staticmethod
-    def from_json(filename: str) -> "EquationSet":
-        with open(filename, "r") as f:
-            equations = json.load(f)
-        return EquationSet(equations)
+    def from_json(filepath: Path, name:str = DEFAULT_NAME) -> "EquationSet":
+        # TODO: include name in JSON
+        with filepath.open("r") as f:
+            equations = [Equation.from_dict(elem) for elem in json.load(f)]
+        return EquationSet(equations, name)
 
 
 class Equation:
@@ -37,6 +49,14 @@ class Equation:
         self.name = name
         self.left = sorted(left, key=lambda term: term.value)
         self.right = sorted(right, key=lambda term: term.value)
+
+    def __repr__(self) -> str:
+        return (f"Equation(\"{self.name}\": "
+                + " ".join(str(term) for term in self.left)
+                + " = "
+                + " ".join(str(term) for term in self.right)
+                + ")"
+                )
 
     def get_all_terms(self) -> list["Term"]:
         return self.left + self.right
@@ -53,6 +73,14 @@ class Equation:
             "left": [term.as_dict() for term in self.left],
             "right": [term.as_dict() for term in self.right],
         }
+
+    @staticmethod
+    def from_dict(data: dict) -> "Equation":
+        return Equation(
+            data["name"],
+            [Term.from_dict(elem) for elem in data["left"]],
+            [Term.from_dict(elem) for elem in data["right"]],
+        )
 
     @staticmethod
     def _check_side(self_side: list["Term"], test_side: list["Term"]) -> bool:
@@ -76,6 +104,12 @@ class Term:
         else:
             raise ValueError("Invalid sign. Must be \"+\" (plus) or \"-\" (minus).")
         self.value = value
+
+    def __repr__(self) -> str:
+        return f"Term(\"{self.name}\": {self.sign} {self.value})"
+
+    def __str__(self) -> str:
+        return f"{self.sign} {self.value}"
 
     def __eq__(self, other: "Term") -> bool:
         # Currently, .name does not need to be the same
@@ -141,7 +175,13 @@ if __name__ == "__main__":
         [dU],
         [delQ, delW])
     my_equations = EquationSet([ideal_gas_law_meteo, hydrostatic_equation, first_law])
+    print(my_equations)
+    for eq in my_equations.equations:
+        print(eq)
     my_equations.to_json(JSON_TEST_PATH)
     with JSON_TEST_PATH.open("r") as file:
         json_data = json.load(file)
         print(json_data)
+    my_new_equations = EquationSet.from_json(JSON_TEST_PATH, "new_equations")
+    print(my_new_equations)
+    print(my_equations == my_new_equations)  # FIXME: should return True...
