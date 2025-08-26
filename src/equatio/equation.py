@@ -126,7 +126,7 @@ class Term:
         return Term(
             name=data["name"],
             value=data["value"],
-            sign=data["sign"],
+            sign=data["sign"] if "sign" in data else "+",
         )
 
 
