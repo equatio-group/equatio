@@ -56,7 +56,7 @@ class Equation:
         return f'Equation("{self.name}": {left_terms} = {right_terms})'
 
     def __eq__(self, other: "Equation") -> bool:
-        return self.left == other.left and self.right == other.right
+        return self.left == other.left and self.right == other.right  # already sorted
 
     def get_all_terms(self) -> list["Term"]:
         return self.left + self.right
@@ -66,7 +66,7 @@ class Equation:
             self.right, test_right
         )
 
-    def as_dict(self) -> dict:
+    def as_dict(self) -> dict[str, str | list[dict[str, str]]]:
         return {
             "name": self.name,
             "left": [term.as_dict() for term in self.left],
@@ -74,7 +74,7 @@ class Equation:
         }
 
     @staticmethod
-    def from_dict(data: dict) -> "Equation":
+    def from_dict(data: dict[str, str | list[dict[str, str]]]) -> "Equation":
         return Equation(
             data["name"],
             [Term.from_dict(elem) for elem in data["left"]],
@@ -83,7 +83,7 @@ class Equation:
 
     @staticmethod
     def _check_side(self_side: list["Term"], test_side: list["Term"]) -> bool:
-        return all(
+        return False if len(self_side) != len(test_side) else all(
             [
                 self_term == test_term
                 for self_term, test_term in zip(
@@ -114,7 +114,7 @@ class Term:
         # Currently, .name does not need to be the same
         return self.sign == other.sign and self.value == other.value
 
-    def as_dict(self) -> dict:
+    def as_dict(self) -> dict[str, str]:
         return {
             "name": self.name,
             "sign": self.sign,
@@ -122,7 +122,7 @@ class Term:
         }
 
     @staticmethod
-    def from_dict(data: dict) -> "Term":
+    def from_dict(data: dict[str, str]) -> "Term":
         return Term(
             name=data["name"],
             value=data["value"],
