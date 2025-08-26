@@ -55,6 +55,9 @@ class Equation:
         right_terms = " ".join(str(term) for term in self.right)
         return f'Equation("{self.name}": {left_terms} = {right_terms})'
 
+    def __eq__(self, other: "Equation") -> bool:
+        return self.left == other.left and self.right == other.right
+
     def get_all_terms(self) -> list["Term"]:
         return self.left + self.right
 
@@ -155,4 +158,4 @@ if __name__ == "__main__":
         print(json_data)
     my_new_equations = EquationSet.from_json(JSON_TEST_PATH, "new_equations")
     print(my_new_equations)
-    print(my_equations == my_new_equations)  # FIXME: should return True...
+    print(my_equations == my_new_equations)
