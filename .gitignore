@@ -1,3 +1,6 @@
+# png files
+*.png
+
 # virtual env
 .venv/*
 

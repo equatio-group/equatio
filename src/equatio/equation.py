@@ -1,6 +1,9 @@
+import hashlib
 import json
+import matplotlib.pyplot as plt
 from pathlib import Path
 
+SPRITE_DIR = Path(__file__).parents[2] / "sprites"
 
 class EquationSet:
     """A collection of equation objects"""
@@ -13,11 +16,11 @@ class EquationSet:
         for equation in equations:  # uses Equation.__eq__ to check
             if equation not in unique_equations:
                 unique_equations.append(equation)
-        self.equations = sorted(unique_equations, key=lambda equation: equation.name)
+        self.equations = sorted(unique_equations, key=lambda equ: equ.name)
         # TODO: are empty EquationSets allowed?
 
     def __repr__(self) -> str:
-        eq_names = ", ".join(equation.name for equation in self.equations)
+        eq_names = ", ".join(equ.name for equ in self.equations)
         return (
             f'EquationSet("{self.name}", containing {len(self.equations)} '
             f"equations: {eq_names})"
@@ -107,13 +110,23 @@ class Equation:
 class Term:
     """Part of an Equation"""
 
-    def __init__(self, name: str, latex_code: str, sign: str = "+") -> None:
+    def __init__(self, name: str, latex_code: str, sign: str = "+", sprite_id: str | None = None) -> None:
         self.name = name
-        if sign in ("+", "-"):
-            self.sign = sign
-        else:
+        if sign not in ("+", "-"):
             raise ValueError('Invalid sign. Must be "+" (plus) or "-" (minus).')
+        self.sign = sign
         self.latex_code = latex_code
+        # ensure unique sprite_id based on sign and latex_code if not provided
+        self.sprite_id = sprite_id or hashlib.sha1(f"{self.sign}{self.latex_code}".encode()).hexdigest()
+        # check if sprite exists
+        if not self.get_sprite_path().exists():
+            # create sprite
+            fig, ax = plt.subplots(figsize=(1, 1), dpi=100)
+            ax.text(0.5, 0.5, f"${self.sign}{self.latex_code}$", fontsize=20,
+                    ha="center", va="center")
+            ax.axis("off")
+            plt.savefig(self.get_sprite_path(), bbox_inches="tight", pad_inches=0.1, transparent=True)
+            plt.close(fig)
 
     def __repr__(self) -> str:
         return f'Term("{self.name}": {self.sign} {self.latex_code})'
@@ -124,6 +137,9 @@ class Term:
     def __eq__(self, other: "Term") -> bool:
         # Currently, .name does not need to be the same
         return self.sign == other.sign and self.latex_code == other.latex_code
+
+    def get_sprite_path(self) -> Path:
+        return SPRITE_DIR / f"{self.sprite_id}.png"
 
     def as_dict(self) -> dict[str, str]:
         return {
@@ -139,3 +155,12 @@ class Term:
             latex_code=data["latex_code"],
             sign=data["sign"] if "sign" in data else "+",
         )
+
+if __name__ == "__main__":
+    # Example usage
+    term1 = Term("x", "x")
+    term2 = Term("y", "y", "-")
+    term3 = Term("z^2", "z^2")
+    equation1 = Equation("ExampleEquation1", [term1], [term2])
+    equation2 = Equation("ExampleEquation2", [term1, term2], [term3])
+    equation_set = EquationSet([equation1, equation2], "ExampleSet")
