@@ -5,19 +5,19 @@
             {
                 "name": "total differential of inner energy",
                 "sign": "+",
-                "value": "\\operatorname{d} U"
+                "latex_code": "\\operatorname{d} U"
             }
         ],
         "right": [
             {
                 "name": "partial differential of heat",
                 "sign": "+",
-                "value": "\\partial Q"
+                "latex_code": "\\partial Q"
             },
             {
                 "name": "partial differential of work",
                 "sign": "+",
-                "value": "\\partial W"
+                "latex_code": "\\partial W"
             }
         ]
     },
@@ -27,14 +27,14 @@
             {
                 "name": "vertical pressure gradient",
                 "sign": "+",
-                "value": "\\frac{\\operatorname{d} p}{\\operatorname{d} z"
+                "latex_code": "\\frac{\\operatorname{d} p}{\\operatorname{d} z}"
             }
         ],
         "right": [
             {
                 "name": "density, gravitational acceleration",
                 "sign": "-",
-                "value": "\\rho g"
+                "latex_code": "\\rho g"
             }
         ]
     },
@@ -44,14 +44,14 @@
             {
                 "name": "pressure",
                 "sign": "+",
-                "value": "p"
+                "latex_code": "p"
             }
         ],
         "right": [
             {
                 "name": "density, specific gas constant, temperature",
                 "sign": "+",
-                "value": "\\rho R T"
+                "latex_code": "\\rho R T"
             }
         ]
     }
