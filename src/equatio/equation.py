@@ -7,6 +7,7 @@ from pathlib import Path
 JSON_DIR = Path(__file__).parents[2] / "data"
 SPRITE_DIR = Path(__file__).parents[2] / "sprites"
 
+
 class EquationSet:
     """A collection of equation objects"""
 
@@ -43,7 +44,7 @@ class EquationSet:
 
     def to_json(self, json_path: Path | None = None) -> None:
         if json_path is None:
-            json_path = JSON_DIR / f"{self.name.replace(" ", "_")}.json"
+            json_path = JSON_DIR / f"{self.name.replace(' ', '_')}.json"
         with json_path.open("w") as f:
             json.dump([equation.as_dict() for equation in self.equations], f, indent=4)
 
@@ -120,7 +121,9 @@ class Equation:
 class Term:
     """Part of an Equation"""
 
-    def __init__(self, name: str, latex_code: str, sign: str = "+", sprite_id: str | None = None) -> None:
+    def __init__(
+        self, name: str, latex_code: str, sign: str = "+", sprite_id: str | None = None
+    ) -> None:
         self.name = name
         if sign not in ("+", "-"):
             raise ValueError('Invalid sign. Must be "+" (plus) or "-" (minus).')
@@ -134,12 +137,23 @@ class Term:
             # create sprite
             fig, ax = plt.subplots(figsize=(1, 1), dpi=100)
             try:
-                ax.text(0.5, 0.5, "".join(["$", full_latex_code, "$"]), fontsize=20,
-                        ha="center", va="center")
+                ax.text(
+                    0.5,
+                    0.5,
+                    "".join(["$", full_latex_code, "$"]),
+                    fontsize=20,
+                    ha="center",
+                    va="center",
+                )
             except Exception as e:
                 raise ValueError(f"Invalid LaTeX code: {latex_code}") from e
             ax.axis("off")
-            plt.savefig(self.get_sprite_path(), bbox_inches="tight", pad_inches=0.1, transparent=True)
+            plt.savefig(
+                self.get_sprite_path(),
+                bbox_inches="tight",
+                pad_inches=0.1,
+                transparent=True,
+            )
             plt.close(fig)
 
     def __repr__(self) -> str:
@@ -172,6 +186,7 @@ class Term:
             sprite_id=data.get("sprite_id") if "sprite_id" in data else None,
         )
 
+
 if __name__ == "__main__":
     # Example usage
     term1 = Term("x^2", "x^2")
@@ -187,5 +202,7 @@ if __name__ == "__main__":
     print(equation_set2.equations)
     print(equation_set1 == equation_set2)
     equation_set1.to_json()
-    equation_set1_reload = EquationSet.from_json(JSON_DIR / "second_equation_set_example.json")
+    equation_set1_reload = EquationSet.from_json(
+        JSON_DIR / "second_equation_set_example.json"
+    )
     print(equation_set1 == equation_set1_reload)
