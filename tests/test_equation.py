@@ -106,7 +106,13 @@ next_gas_law = Equation("ideal gas law (not only) for meteorology", [p], [rho_R_
 gas_law_dict = {
     "name": "ideal gas law for meteorology",
     "left": [{"name": "pressure", "value": "p", "sign": "+"}],
-    "right": [{"name": "density, specific gas constant, temperature", "value": r"\rho R T", "sign": "+"}],
+    "right": [
+        {
+            "name": "density, specific gas constant, temperature",
+            "value": r"\rho R T",
+            "sign": "+",
+        }
+    ],
 }
 # hydrostatic equation
 dp_dz = Term(
@@ -117,11 +123,18 @@ dp_dz = Term(
 rho_g = Term("density, gravitational acceleration", r"\rho g", "-")
 hydrostatic_terms = [dp_dz, rho_g]
 hydrostatic = Equation("hydrostatic equation", [dp_dz], [rho_g])
-hydrostatic_wrong_sides = Equation("hydrostatic equation",[rho_g],[dp_dz])
+hydrostatic_wrong_sides = Equation("hydrostatic equation", [rho_g], [dp_dz])
 hydrostatic_dict = {
     "name": "hydrostatic equation",
-    "left": [{"name": "vertical pressure gradient", "value": r"\frac{\operatorname{d} p}{\operatorname{d} z"}],  # sign should default to "+"
-    "right": [{"name": "density, gravitational acceleration", "value": r"\rho g", "sign": "-"}],
+    "left": [
+        {
+            "name": "vertical pressure gradient",
+            "value": r"\frac{\operatorname{d} p}{\operatorname{d} z",
+        }
+    ],  # sign should default to "+"
+    "right": [
+        {"name": "density, gravitational acceleration", "value": r"\rho g", "sign": "-"}
+    ],
 }
 # first law of thermodynamics
 dU = Term("total differential of inner energy", r"\operatorname{d} U", "+")
@@ -132,20 +145,35 @@ first_law = Equation("first law of thermodynamics", [dU], [delQ, delW])
 first_law_other_order = Equation("first law of thermodynamics", [dU], [delW, delQ])
 first_law_dict = {
     "name": "first law of thermodynamics",
-    "left": [{"name": "total differential of inner energy", "value": r"\operatorname{d} U", "sign": "+"}],
-    "right": [{"name": "partial differential of work", "value": r"\partial W", "sign": "+"}, {"name": "partial differential of heat", "value": r"\partial Q", "sign": "+"}],  # other order
+    "left": [
+        {
+            "name": "total differential of inner energy",
+            "value": r"\operatorname{d} U",
+            "sign": "+",
+        }
+    ],
+    "right": [
+        {"name": "partial differential of work", "value": r"\partial W", "sign": "+"},
+        {"name": "partial differential of heat", "value": r"\partial Q", "sign": "+"},
+    ],  # other order
 }
+
 
 @pytest.mark.parametrize(
     "e1, e2, result",
     [
         (gas_law, next_gas_law, True),
         (hydrostatic, hydrostatic_wrong_sides, False),  # wrong sides
-        (first_law, first_law_other_order, True), # other order within sides should not matter
+        (
+            first_law,
+            first_law_other_order,
+            True,
+        ),  # other order within sides should not matter
     ],
 )
 def test_equation_equality(e1: Equation, e2: Equation, result: bool) -> None:
     assert result == (e1 == e2)
+
 
 @pytest.mark.parametrize(
     "e, terms, result",
@@ -156,10 +184,14 @@ def test_equation_equality(e1: Equation, e2: Equation, result: bool) -> None:
         (gas_law, hydrostatic_terms, False),
         (hydrostatic, first_law_terms, False),
         (first_law, gas_law_terms, False),
-    ]
+    ],
 )
 def test_equation_get_items(e: Equation, terms: list[Term], result: bool) -> None:
-    assert result == (sorted(e.get_all_terms(), key=lambda term: term.value) == sorted(terms, key=lambda term: term.value))
+    assert result == (
+        sorted(e.get_all_terms(), key=lambda term: term.value)
+        == sorted(terms, key=lambda term: term.value)
+    )
+
 
 @pytest.mark.parametrize(
     "e, left_test, right_test, result",
@@ -168,21 +200,31 @@ def test_equation_get_items(e: Equation, terms: list[Term], result: bool) -> Non
         (gas_law, gas_law_terms[1:2], gas_law_terms[0:1], True),
         (gas_law, gas_law_terms, hydrostatic_terms, False),
         (hydrostatic, hydrostatic_terms[0:1], hydrostatic_terms[1:2], True),
-        (hydrostatic_wrong_sides, hydrostatic_terms[0:1], hydrostatic_terms[1:2], False),
+        (
+            hydrostatic_wrong_sides,
+            hydrostatic_terms[0:1],
+            hydrostatic_terms[1:2],
+            False,
+        ),
         (hydrostatic_wrong_sides, hydrostatic_terms[1:2], hydrostatic_terms[0:1], True),
         (first_law, first_law_terms[0:1], first_law_terms[1:2], False),
         (first_law, first_law_terms[0:1], first_law_terms[1:3], True),
         (first_law_other_order, first_law_terms[0:1], first_law_terms[1:3], True),
-    ]
+    ],
 )
-def test_equation_check_input(e: Equation, left_test: list[Term], right_test: list[Term], result: bool) -> None:
+def test_equation_check_input(
+    e: Equation, left_test: list[Term], right_test: list[Term], result: bool
+) -> None:
     assert result == e.check_input(left_test, right_test)
 
+
 @pytest.mark.parametrize(
-    "e", [gas_law, hydrostatic, hydrostatic_wrong_sides, first_law, first_law_other_order]
+    "e",
+    [gas_law, hydrostatic, hydrostatic_wrong_sides, first_law, first_law_other_order],
 )
 def test_eqation_dict_cycle(e: Equation) -> None:
     assert e == Equation.from_dict(e.as_dict())
+
 
 @pytest.mark.parametrize(
     "e, e_dict, result",
@@ -191,12 +233,21 @@ def test_eqation_dict_cycle(e: Equation) -> None:
         (gas_law, hydrostatic_dict, False),
         (hydrostatic, hydrostatic_dict, False),  # sign is missing in hydrostatic_dict
         (hydrostatic_wrong_sides, hydrostatic_dict, False),
-        (first_law, first_law_dict, False),  # other (alphabetically wrong) order in dict
-        (first_law_other_order, first_law_dict, False),  # same here although order in constructor and dict are the same (gets sorted during construction)
-    ]
+        (
+            first_law,
+            first_law_dict,
+            False,
+        ),  # other (alphabetically wrong) order in dict
+        (
+            first_law_other_order,
+            first_law_dict,
+            False,
+        ),  # same here although order in constructor and dict are the same (gets sorted during construction)
+    ],
 )
 def test_equation_as_dict(e: Equation, e_dict: dict, result: bool) -> None:
     assert result == (e.as_dict() == e_dict)
+
 
 @pytest.mark.parametrize(
     "e_dict, e, result",
@@ -207,19 +258,25 @@ def test_equation_as_dict(e: Equation, e_dict: dict, result: bool) -> None:
         (hydrostatic_dict, hydrostatic_wrong_sides, False),
         (first_law_dict, first_law, True),  # other order in dict shoud work fine
         (first_law_dict, first_law_other_order, True),
-    ]
+    ],
 )
 def test_equation_from_dict(e_dict: dict, e: Equation, result: bool) -> None:
     assert result == (Equation.from_dict(e_dict) == e)
+
 
 # Test EquationSets
 one_equation_set = EquationSet([gas_law], "one term set")
 same_one_equation_set = EquationSet([gas_law])  # with default name
 other_one_equation_set = EquationSet([first_law], "other one term set")
-false_two_equation_set = EquationSet([first_law, first_law_other_order], "one term set")  # should only yield one equation in set
+false_two_equation_set = EquationSet(
+    [first_law, first_law_other_order], "one term set"
+)  # should only yield one equation in set
 very_basic_equation_set = EquationSet([gas_law, hydrostatic], "basic equations")
-very_basic_equation_set_other_way_round = EquationSet([hydrostatic, gas_law], "basic equations")
+very_basic_equation_set_other_way_round = EquationSet(
+    [hydrostatic, gas_law], "basic equations"
+)
 basic_equation_set = EquationSet([gas_law, hydrostatic, first_law], "basic equations")
+
 
 @pytest.mark.parametrize(
     "es1, es2, result",
@@ -230,10 +287,13 @@ basic_equation_set = EquationSet([gas_law, hydrostatic, first_law], "basic equat
         (one_equation_set, other_one_equation_set, False),
         (very_basic_equation_set, very_basic_equation_set_other_way_round, True),
         (very_basic_equation_set, basic_equation_set, False),
-    ]
+    ],
 )
-def test_equation_set_equality(es1: EquationSet, es2: EquationSet, result: bool) -> None:
+def test_equation_set_equality(
+    es1: EquationSet, es2: EquationSet, result: bool
+) -> None:
     assert result == (es1 == es2)
+
 
 @pytest.mark.parametrize(
     "es, e",
@@ -241,7 +301,7 @@ def test_equation_set_equality(es1: EquationSet, es2: EquationSet, result: bool)
         (one_equation_set, hydrostatic),
         (very_basic_equation_set, first_law),
         (basic_equation_set, hydrostatic_wrong_sides),
-    ]
+    ],
 )
 def test_equation_set_add_remove_cycle(es: EquationSet, e: Equation) -> None:
     new_es: EquationSet = deepcopy(es)
@@ -249,13 +309,14 @@ def test_equation_set_add_remove_cycle(es: EquationSet, e: Equation) -> None:
     new_es.remove_equation(e)
     assert es == new_es
 
+
 @pytest.mark.parametrize(
     "es, e",
     [
         (one_equation_set, gas_law),
         (very_basic_equation_set, hydrostatic),
         (basic_equation_set, first_law),
-    ]
+    ],
 )
 def test_equation_set_remove_add_cycle(es: EquationSet, e: Equation) -> None:
     new_es: EquationSet = deepcopy(es)
@@ -263,18 +324,22 @@ def test_equation_set_remove_add_cycle(es: EquationSet, e: Equation) -> None:
     new_es.add_equation(e)
     assert es == new_es
 
+
 @pytest.mark.parametrize(
     "es, e_to_remove, es_new",
     [
         (very_basic_equation_set, hydrostatic, one_equation_set),
         (basic_equation_set, first_law, very_basic_equation_set),
         (basic_equation_set, first_law, very_basic_equation_set_other_way_round),
-    ]
+    ],
 )
-def test_equation_set_remove(es: EquationSet, e_to_remove: Equation, es_new: EquationSet) -> None:
+def test_equation_set_remove(
+    es: EquationSet, e_to_remove: Equation, es_new: EquationSet
+) -> None:
     es_removed: EquationSet = deepcopy(es)
     es_removed.remove_equation(e_to_remove)
     assert es_removed == es_new
+
 
 @pytest.mark.parametrize(
     "es, e_to_add, es_new",
@@ -282,17 +347,21 @@ def test_equation_set_remove(es: EquationSet, e_to_remove: Equation, es_new: Equ
         (one_equation_set, hydrostatic, very_basic_equation_set),
         (very_basic_equation_set, first_law, basic_equation_set),
         (very_basic_equation_set_other_way_round, first_law, basic_equation_set),
-    ]
+    ],
 )
-def test_equation_set_add(es: EquationSet, e_to_add: Equation, es_new: EquationSet) -> None:
+def test_equation_set_add(
+    es: EquationSet, e_to_add: Equation, es_new: EquationSet
+) -> None:
     es_added: EquationSet = deepcopy(es)
     es_added.add_equation(e_to_add)
     assert es_added == es_new
+
 
 # Test JSON import/export
 @pytest.fixture(params=[one_equation_set, very_basic_equation_set, basic_equation_set])
 def equation_set(request) -> EquationSet:
     return request.param
+
 
 def test_equation_set_json_cycle(equation_set: EquationSet, tmp_path: Path) -> None:
     # tmp_path is a pytest built-in fixture providing a temp directory for file tests
@@ -303,35 +372,45 @@ def test_equation_set_json_cycle(equation_set: EquationSet, tmp_path: Path) -> N
     es_in = EquationSet.from_json(out_path)
     assert equation_set == es_in
 
+
 def test_equation_set_to_json(equation_set: EquationSet, tmp_path: Path) -> None:
     out_path = tmp_path / "eq.json"
     equation_set.to_json(out_path)
     test_data = json.loads(out_path.read_text())
 
     assert isinstance(test_data, list)
-    # assert test_data[0]["name"] == equation_set.name  #TODO: uncomment after implementation in equation.py
+    #TODO: add name test after implementation of JSON name storing in equation.py
     for i, eq in enumerate(equation_set.equations):
         for j, term in enumerate(eq.left):
             assert test_data[i]["left"][j] == term.as_dict()
         for j, term in enumerate(eq.right):
             assert test_data[i]["right"][j] == term.as_dict()
 
+
 def test_equation_set_from_json_manual(tmp_path):
     file = tmp_path / "eq.json"
     test_eq1_dict: dict[str, str | list[dict[str, str]]] = {
-            "name": "eq1",
-            "left": [{"name": "a", "sign": "+", "value": "a"}],
-            "right": [{"name": "b", "sign": "-", "value": "b"}],
-        }
+        "name": "eq1",
+        "left": [{"name": "a", "sign": "+", "value": "a"}],
+        "right": [{"name": "b", "sign": "-", "value": "b"}],
+    }
     test_eq2_dict: dict[str, str | list[dict[str, str]]] = {
         "name": "eq2",
-        "left": [{"name": "c", "sign": "+", "value": "c"}, {"name": "d", "sign": "-", "value": "d"}],
+        "left": [
+            {"name": "c", "sign": "+", "value": "c"},
+            {"name": "d", "sign": "-", "value": "d"},
+        ],
         "right": [{"name": "e", "sign": "+", "value": "e"}],
     }
-    file.write_text(json.dumps([
-        test_eq1_dict,
-        test_eq2_dict,
-    ], indent=4))
+    file.write_text(
+        json.dumps(
+            [
+                test_eq1_dict,
+                test_eq2_dict,
+            ],
+            indent=4,
+        )
+    )
 
     es = EquationSet.from_json(file, "test_set")
 
