@@ -9,25 +9,25 @@ from src.equatio.equation import Term, Equation, EquationSet
 t_p1 = Term("pressure", "p", "+")
 t_p1_dict = {
     "name": "pressure",
-    "value": "p",
+    "latex_code": "p",
     "sign": "+",
 }
 t_p2 = Term("more_pressure", "p", "+")
 t_p2_dict = {
     "name": "more_pressure",
     # no sign to check if default works
-    "value": "p",
+    "latex_code": "p",
 }
 t_p3 = Term("pressure", "p", "-")
 t_p3_dict = {
-    "value": "p",
+    "latex_code": "p",
     "name": "pressure",
     "sign": "-",
 }
 t_p4 = Term("less_pressure", "p", "-")
 t_p4_dict = {
     "sign": "-",
-    "value": "p",
+    "latex_code": "p",
     "name": "less_pressure",
 }
 
@@ -49,17 +49,17 @@ def test_term_equality(t1: Term, t2: Term, result: bool) -> None:
 
 
 @pytest.mark.parametrize(
-    "name, value, sign",
+    "name, latex_code, sign",
     [
         ("invalid_pressure", "p", "*"),
         ("invalid_pressure", "p", "1"),
         ("invalid_pressure", "p", "a"),
     ],
 )
-def test_term_invalid_sign_handling(name: str, value: str, sign: str) -> None:
+def test_term_invalid_sign_handling(name: str, latex_code: str, sign: str) -> None:
     """test error handling for invalid signs in Term constructor"""
     with pytest.raises(ValueError):
-        Term(name, value, sign)
+        Term(name, latex_code, sign)
 
 
 @pytest.mark.parametrize("t", [t_p1, t_p2, t_p3, t_p4])
@@ -105,11 +105,11 @@ gas_law = Equation("ideal gas law for meteorology", [p], [rho_R_T])
 next_gas_law = Equation("ideal gas law (not only) for meteorology", [p], [rho_R_T])
 gas_law_dict = {
     "name": "ideal gas law for meteorology",
-    "left": [{"name": "pressure", "value": "p", "sign": "+"}],
+    "left": [{"name": "pressure", "latex_code": "p", "sign": "+"}],
     "right": [
         {
             "name": "density, specific gas constant, temperature",
-            "value": r"\rho R T",
+            "latex_code": r"\rho R T",
             "sign": "+",
         }
     ],
@@ -129,11 +129,11 @@ hydrostatic_dict = {
     "left": [
         {
             "name": "vertical pressure gradient",
-            "value": r"\frac{\operatorname{d} p}{\operatorname{d} z",
+            "latex_code": r"\frac{\operatorname{d} p}{\operatorname{d} z",
         }
     ],  # sign should default to "+"
     "right": [
-        {"name": "density, gravitational acceleration", "value": r"\rho g", "sign": "-"}
+        {"name": "density, gravitational acceleration", "latex_code": r"\rho g", "sign": "-"}
     ],
 }
 # first law of thermodynamics
@@ -148,13 +148,13 @@ first_law_dict = {
     "left": [
         {
             "name": "total differential of inner energy",
-            "value": r"\operatorname{d} U",
+            "latex_code": r"\operatorname{d} U",
             "sign": "+",
         }
     ],
     "right": [
-        {"name": "partial differential of work", "value": r"\partial W", "sign": "+"},
-        {"name": "partial differential of heat", "value": r"\partial Q", "sign": "+"},
+        {"name": "partial differential of work", "latex_code": r"\partial W", "sign": "+"},
+        {"name": "partial differential of heat", "latex_code": r"\partial Q", "sign": "+"},
     ],  # other order
 }
 
@@ -188,8 +188,8 @@ def test_equation_equality(e1: Equation, e2: Equation, result: bool) -> None:
 )
 def test_equation_get_items(e: Equation, terms: list[Term], result: bool) -> None:
     assert result == (
-        sorted(e.get_all_terms(), key=lambda term: term.value)
-        == sorted(terms, key=lambda term: term.value)
+        sorted(e.get_all_terms(), key=lambda term: term.latex_code)
+        == sorted(terms, key=lambda term: term.latex_code)
     )
 
 
@@ -391,16 +391,16 @@ def test_equation_set_from_json_manual(tmp_path):
     file = tmp_path / "eq.json"
     test_eq1_dict: dict[str, str | list[dict[str, str]]] = {
         "name": "eq1",
-        "left": [{"name": "a", "sign": "+", "value": "a"}],
-        "right": [{"name": "b", "sign": "-", "value": "b"}],
+        "left": [{"name": "a", "sign": "+", "latex_code": "a"}],
+        "right": [{"name": "b", "sign": "-", "latex_code": "b"}],
     }
     test_eq2_dict: dict[str, str | list[dict[str, str]]] = {
         "name": "eq2",
         "left": [
-            {"name": "c", "sign": "+", "value": "c"},
-            {"name": "d", "sign": "-", "value": "d"},
+            {"name": "c", "sign": "+", "latex_code": "c"},
+            {"name": "d", "sign": "-", "latex_code": "d"},
         ],
-        "right": [{"name": "e", "sign": "+", "value": "e"}],
+        "right": [{"name": "e", "sign": "+", "latex_code": "e"}],
     }
     file.write_text(
         json.dumps(

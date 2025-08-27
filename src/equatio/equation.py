@@ -53,8 +53,8 @@ class Equation:
 
     def __init__(self, name: str, left: list["Term"], right: list["Term"]) -> None:
         self.name = name
-        self.left = sorted(left, key=lambda term: term.value)
-        self.right = sorted(right, key=lambda term: term.value)
+        self.left = sorted(left, key=lambda term: term.latex_code)
+        self.right = sorted(right, key=lambda term: term.latex_code)
         # TODO: check that left and right side are not empty (or default to zero-term?)
 
     def __repr__(self) -> str:
@@ -97,7 +97,7 @@ class Equation:
                 [
                     self_term == test_term
                     for self_term, test_term in zip(
-                        self_side, sorted(test_side, key=lambda term: term.value)
+                        self_side, sorted(test_side, key=lambda term: term.latex_code)
                     )
                 ]
             )
@@ -107,35 +107,35 @@ class Equation:
 class Term:
     """Part of an Equation"""
 
-    def __init__(self, name: str, value: str, sign: str = "+") -> None:
+    def __init__(self, name: str, latex_code: str, sign: str = "+") -> None:
         self.name = name
         if sign in ("+", "-"):
             self.sign = sign
         else:
             raise ValueError('Invalid sign. Must be "+" (plus) or "-" (minus).')
-        self.value = value
+        self.latex_code = latex_code
 
     def __repr__(self) -> str:
-        return f'Term("{self.name}": {self.sign} {self.value})'
+        return f'Term("{self.name}": {self.sign} {self.latex_code})'
 
     def __str__(self) -> str:
-        return f"{self.sign} {self.value}"
+        return f"{self.sign} {self.latex_code}"
 
     def __eq__(self, other: "Term") -> bool:
         # Currently, .name does not need to be the same
-        return self.sign == other.sign and self.value == other.value
+        return self.sign == other.sign and self.latex_code == other.latex_code
 
     def as_dict(self) -> dict[str, str]:
         return {
             "name": self.name,
             "sign": self.sign,
-            "value": self.value,
+            "latex_code": self.latex_code,
         }
 
     @staticmethod
     def from_dict(data: dict[str, str]) -> "Term":
         return Term(
             name=data["name"],
-            value=data["value"],
+            latex_code=data["latex_code"],
             sign=data["sign"] if "sign" in data else "+",
         )
