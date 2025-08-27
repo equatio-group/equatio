@@ -3,3 +3,6 @@
 
 # IDE settings (PyCharm)
 .idea/*
+
+# python cache
+__pycache__/
