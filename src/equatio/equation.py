@@ -1,6 +1,5 @@
 import hashlib
 import json
-import matplotlib
 import matplotlib.pyplot as plt
 from pathlib import Path
 
@@ -61,19 +60,19 @@ class Equation:
     """An equation with terms divided into left and right part"""
 
     def __init__(self, name: str, left: list["Term"], right: list["Term"]) -> None:
-        ZERO_TERM = Term("0", "0", "+")
+        zero_term = Term("0", "0", "+")
         self.name = name
         # empty sides default to zero-term
         if not left:
-            left = [ZERO_TERM]
+            left = [zero_term]
         if not right:
-            right = [ZERO_TERM]
-        self.left = sorted(left, key=lambda term: term.latex_code)
-        self.right = sorted(right, key=lambda term: term.latex_code)
+            right = [zero_term]
+        self.left = sorted(left, key=lambda t: t.latex_code)
+        self.right = sorted(right, key=lambda t: t.latex_code)
 
     def __repr__(self) -> str:
-        left_terms = " ".join(str(term) for term in self.left)
-        right_terms = " ".join(str(term) for term in self.right)
+        left_terms = " ".join(str(t) for t in self.left)
+        right_terms = " ".join(str(t) for t in self.right)
         return f'Equation("{self.name}": {left_terms} = {right_terms})'
 
     def __eq__(self, other: "Equation") -> bool:
@@ -90,8 +89,8 @@ class Equation:
     def as_dict(self) -> dict[str, str | list[dict[str, str]]]:
         return {
             "name": self.name,
-            "left": [term.as_dict() for term in self.left],
-            "right": [term.as_dict() for term in self.right],
+            "left": [t.as_dict() for t in self.left],
+            "right": [t.as_dict() for t in self.right],
         }
 
     @staticmethod
@@ -111,7 +110,7 @@ class Equation:
                 [
                     self_term == test_term
                     for self_term, test_term in zip(
-                        self_side, sorted(test_side, key=lambda term: term.latex_code)
+                        self_side, sorted(test_side, key=lambda t: t.latex_code)
                     )
                 ]
             )
