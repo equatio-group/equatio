@@ -133,7 +133,11 @@ hydrostatic_dict = {
         }
     ],  # sign should default to "+"
     "right": [
-        {"name": "density, gravitational acceleration", "latex_code": r"\rho g", "sign": "-"}
+        {
+            "name": "density, gravitational acceleration",
+            "latex_code": r"\rho g",
+            "sign": "-",
+        }
     ],
 }
 # first law of thermodynamics
@@ -153,8 +157,16 @@ first_law_dict = {
         }
     ],
     "right": [
-        {"name": "partial differential of work", "latex_code": r"\partial W", "sign": "+"},
-        {"name": "partial differential of heat", "latex_code": r"\partial Q", "sign": "+"},
+        {
+            "name": "partial differential of work",
+            "latex_code": r"\partial W",
+            "sign": "+",
+        },
+        {
+            "name": "partial differential of heat",
+            "latex_code": r"\partial Q",
+            "sign": "+",
+        },
     ],  # other order
 }
 
@@ -379,7 +391,7 @@ def test_equation_set_to_json(equation_set: EquationSet, tmp_path: Path) -> None
     test_data = json.loads(out_path.read_text())
 
     assert isinstance(test_data, list)
-    #TODO: add name test after implementation of JSON name storing in equation.py
+    # TODO: add name test after implementation of JSON name storing in equation.py
     for i, eq in enumerate(equation_set.equations):
         for j, term in enumerate(eq.left):
             assert test_data[i]["left"][j] == term.as_dict()
