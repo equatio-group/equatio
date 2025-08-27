@@ -3,6 +3,7 @@ import json
 import matplotlib.pyplot as plt
 from pathlib import Path
 
+JSON_DIR = Path(__file__).parent[2] / "data"
 SPRITE_DIR = Path(__file__).parents[2] / "sprites"
 
 class EquationSet:
@@ -38,14 +39,16 @@ class EquationSet:
         self.equations.remove(equation)
         # TODO: raise error if equation is not in set?
 
-    def to_json(self, json_file: Path) -> None:
-        # TODO: include name in JSON
-        with json_file.open("w") as f:
+    def to_json(self, json_path: Path | None = None) -> None:
+        if json_path is None:
+            json_path = JSON_DIR / f"{self.name.replace(" ", "_")}.json"
+        with json_path.open("w") as f:
             json.dump([equation.as_dict() for equation in self.equations], f, indent=4)
 
     @staticmethod
-    def from_json(filepath: Path, name: str = DEFAULT_NAME) -> "EquationSet":
-        # TODO: include name in JSON
+    def from_json(filepath: Path, name: str | None = None) -> "EquationSet":
+        if name is None:
+            name = filepath.stem.replace("_", " ")
         with filepath.open("r") as f:
             equations = [Equation.from_dict(elem) for elem in json.load(f)]
         return EquationSet(equations, name)
