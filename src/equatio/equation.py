@@ -120,12 +120,13 @@ class Term:
         self.sign = sign
         self.latex_code = latex_code
         # ensure unique sprite_id based on sign and latex_code if not provided
-        self.sprite_id = sprite_id or hashlib.sha1(f"{self.sign}{self.latex_code}".encode()).hexdigest()
+        full_latex_code = "".join([self.sign, self.latex_code])  # no f-string bc of {}
+        self.sprite_id = sprite_id or hashlib.sha1(full_latex_code.encode()).hexdigest()
         # check if sprite exists
         if not self.get_sprite_path().exists():
             # create sprite
             fig, ax = plt.subplots(figsize=(1, 1), dpi=100)
-            ax.text(0.5, 0.5, f"${self.sign}{self.latex_code}$", fontsize=20,
+            ax.text(0.5, 0.5, "".join(["$", full_latex_code, "$"]), fontsize=20,
                     ha="center", va="center")
             ax.axis("off")
             plt.savefig(self.get_sprite_path(), bbox_inches="tight", pad_inches=0.1, transparent=True)
@@ -161,9 +162,9 @@ class Term:
 
 if __name__ == "__main__":
     # Example usage
-    term1 = Term("x", "x")
-    term2 = Term("y", "y", "-")
-    term3 = Term("z^2", "z^2")
+    term1 = Term("x^2", "x^2")
+    term2 = Term("y/p", r"\frac{y}{\pi}", "-")
+    term3 = Term("dp/dz", r"\frac{\operatorname{d} p}{\operatorname{d} z}")
     equation1 = Equation("ExampleEquation1", [term1], [term2])
     equation2 = Equation("ExampleEquation2", [term1, term2], [term3])
     equation_set = EquationSet([equation1, equation2], "ExampleSet")

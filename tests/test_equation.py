@@ -117,7 +117,7 @@ gas_law_dict = {
 # hydrostatic equation
 dp_dz = Term(
     "vertical pressure gradient",
-    r"\frac{\operatorname{d} p}{\operatorname{d} z",
+    r"\frac{\operatorname{d} p}{\operatorname{d} z}",
     "+",
 )
 rho_g = Term("density, gravitational acceleration", r"\rho g", "-")
@@ -129,7 +129,7 @@ hydrostatic_dict = {
     "left": [
         {
             "name": "vertical pressure gradient",
-            "latex_code": r"\frac{\operatorname{d} p}{\operatorname{d} z",
+            "latex_code": r"\frac{\operatorname{d} p}{\operatorname{d} z}",
         }
     ],  # sign should default to "+"
     "right": [
@@ -412,9 +412,10 @@ def test_equation_set_from_json_manual(tmp_path):
         )
     )
 
-    es = EquationSet.from_json(file, "test_set")
+    es = EquationSet.from_json(file)
 
     assert len(es.equations) == 2
+    assert es.name == "eq"  # from filename without .json
     for eq, eq_dict in zip(es.equations, [test_eq1_dict, test_eq2_dict]):
         assert eq.as_dict() == eq_dict
         assert eq.name == eq_dict["name"]
