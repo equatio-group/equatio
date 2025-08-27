@@ -1,7 +1,7 @@
-from pickle import FALSE
-
-import pytest
 from copy import deepcopy
+import json
+from pathlib import Path
+import pytest
 
 from src.equatio.equation import Term, Equation, EquationSet
 
@@ -289,4 +289,55 @@ def test_equation_set_add(es: EquationSet, e_to_add: Equation, es_new: EquationS
     es_added.add_equation(e_to_add)
     assert es_added == es_new
 
-# TODO: test JSON import/export
+# Test JSON import/export
+@pytest.fixture(params=[one_equation_set, very_basic_equation_set, basic_equation_set])
+def equation_set(request) -> EquationSet:
+    return request.param
+
+def test_equation_set_json_cycle(equation_set: EquationSet, tmp_path: Path) -> None:
+    # tmp_path is a pytest built-in fixture providing a temp directory for file tests
+    # export
+    out_path = tmp_path / f"{equation_set.name.replace(' ', '_')}.json"
+    equation_set.to_json(out_path)
+    # import
+    es_in = EquationSet.from_json(out_path)
+    assert equation_set == es_in
+
+def test_equation_set_to_json(equation_set: EquationSet, tmp_path: Path) -> None:
+    out_path = tmp_path / "eq.json"
+    equation_set.to_json(out_path)
+    test_data = json.loads(out_path.read_text())
+
+    assert isinstance(test_data, list)
+    # assert test_data[0]["name"] == equation_set.name  #TODO: uncomment after implementation in equation.py
+    for i, eq in enumerate(equation_set.equations):
+        for j, term in enumerate(eq.left):
+            assert test_data[i]["left"][j] == term.as_dict()
+        for j, term in enumerate(eq.right):
+            assert test_data[i]["right"][j] == term.as_dict()
+
+def test_equation_set_from_json_manual(tmp_path):
+    file = tmp_path / "eq.json"
+    test_eq1_dict: dict[str, str | list[dict[str, str]]] = {
+            "name": "eq1",
+            "left": [{"name": "a", "sign": "+", "value": "a"}],
+            "right": [{"name": "b", "sign": "-", "value": "b"}],
+        }
+    test_eq2_dict: dict[str, str | list[dict[str, str]]] = {
+        "name": "eq2",
+        "left": [{"name": "c", "sign": "+", "value": "c"}, {"name": "d", "sign": "-", "value": "d"}],
+        "right": [{"name": "e", "sign": "+", "value": "e"}],
+    }
+    file.write_text(json.dumps([
+        test_eq1_dict,
+        test_eq2_dict,
+    ], indent=4))
+
+    es = EquationSet.from_json(file, "test_set")
+
+    assert len(es.equations) == 2
+    for eq, eq_dict in zip(es.equations, [test_eq1_dict, test_eq2_dict]):
+        assert eq.as_dict() == eq_dict
+        assert eq.name == eq_dict["name"]
+        assert eq.left == [Term.from_dict(t) for t in eq_dict["left"]]
+        assert eq.right == [Term.from_dict(t) for t in eq_dict["right"]]
