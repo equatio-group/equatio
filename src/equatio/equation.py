@@ -3,7 +3,7 @@ import json
 import matplotlib.pyplot as plt
 from pathlib import Path
 
-JSON_DIR = Path(__file__).parent[2] / "data"
+JSON_DIR = Path(__file__).parents[2] / "data"
 SPRITE_DIR = Path(__file__).parents[2] / "sprites"
 
 class EquationSet:
