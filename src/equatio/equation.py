@@ -90,13 +90,17 @@ class Equation:
 
     @staticmethod
     def _check_side(self_side: list["Term"], test_side: list["Term"]) -> bool:
-        return False if len(self_side) != len(test_side) else all(
-            [
-                self_term == test_term
-                for self_term, test_term in zip(
-                    self_side, sorted(test_side, key=lambda term: term.value)
-                )
-            ]
+        return (
+            False
+            if len(self_side) != len(test_side)
+            else all(
+                [
+                    self_term == test_term
+                    for self_term, test_term in zip(
+                        self_side, sorted(test_side, key=lambda term: term.value)
+                    )
+                ]
+            )
         )
 
 
