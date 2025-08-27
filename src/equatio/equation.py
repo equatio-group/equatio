@@ -139,34 +139,3 @@ class Term:
             value=data["value"],
             sign=data["sign"] if "sign" in data else "+",
         )
-
-
-# just for testing and as example
-if __name__ == "__main__":
-    PROJECT_ROOT = Path(__file__).resolve().parents[2]
-    JSON_TEST_PATH = PROJECT_ROOT / "data" / "equations.json"
-    p = Term("pressure", "p", "+")
-    rho_R_T = Term("density, specific gas constant, temperature", r"\rho R T", "+")
-    ideal_gas_law_meteo = Equation("ideal gas law for meteorology", [p], [rho_R_T])
-    dp_dz = Term(
-        "vertical pressure gradient",
-        r"\frac{\operatorname{d} p}{\operatorname{d} z",
-        "+",
-    )
-    rho_g = Term("density, gravitational acceleration", r"\rho g", "-")
-    hydrostatic_equation = Equation("hydrostatic equation", [dp_dz], [rho_g])
-    dU = Term("total differential of inner energy", r"\operatorname{d} U", "+")
-    delQ = Term("partial differential of heat", r"\partial Q", "+")
-    delW = Term("partial differential of work", r"\partial W", "+")
-    first_law = Equation("first law of thermodynamics", [dU], [delQ, delW])
-    my_equations = EquationSet([ideal_gas_law_meteo, hydrostatic_equation, first_law])
-    print(my_equations)
-    for eq in my_equations.equations:
-        print(eq)
-    my_equations.to_json(JSON_TEST_PATH)
-    with JSON_TEST_PATH.open("r") as file:
-        json_data = json.load(file)
-        print(json_data)
-    my_new_equations = EquationSet.from_json(JSON_TEST_PATH, "new_equations")
-    print(my_new_equations)
-    print(my_equations == my_new_equations)
