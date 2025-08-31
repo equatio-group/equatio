@@ -1,5 +1,5 @@
 
-#hiier kommt die py.game Umgebung
+#hier kommt die py.game Umgebung
 
 import pygame
 import numpy as np
