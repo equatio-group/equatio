@@ -1,5 +1,10 @@
+import hashlib
 import json
+import matplotlib.pyplot as plt
 from pathlib import Path
+
+JSON_DIR = Path(__file__).parents[2] / "data"
+SPRITE_DIR = Path(__file__).parents[2] / "sprites"
 
 
 class EquationSet:
@@ -9,14 +14,18 @@ class EquationSet:
 
     def __init__(self, equations: list["Equation"], name: str = DEFAULT_NAME) -> None:
         self.name = name
-        self.equations = sorted(equations, key=lambda equation: equation.name)
+        unique_equations = []
+        for equation in equations:  # uses Equation.__eq__ to check
+            if equation not in unique_equations:
+                unique_equations.append(equation)
+        self.equations = sorted(unique_equations, key=lambda equ: equ.name)
 
     def __repr__(self) -> str:
-        return (f"EquationSet(\"{self.name}\", "
-                + f"containing {len(self.equations)} equations: "
-                + ", ".join(equation.name for equation in self.equations)
-                + ")"
-                )
+        eq_names = ", ".join(equ.name for equ in self.equations)
+        return (
+            f'EquationSet("{self.name}", containing {len(self.equations)} '
+            f"equations: {eq_names})"
+        )
 
     def __eq__(self, other: "EquationSet") -> bool:
         # Currently only works if other has the right equation names
@@ -27,16 +36,21 @@ class EquationSet:
         self.equations = sorted(self.equations, key=lambda equation: equation.name)
 
     def remove_equation(self, equation: "Equation") -> None:
-        self.equations.remove(equation)
+        if equation in self.equations:
+            self.equations.remove(equation)
+        else:
+            raise ValueError("Equation not found in the set.")
 
-    def to_json(self, json_file: Path) -> None:
-        # TODO: include name in JSON
-        with json_file.open("w") as f:
+    def to_json(self, json_path: Path | None = None) -> None:
+        if json_path is None:
+            json_path = JSON_DIR / f"{self.name.replace(' ', '_')}.json"
+        with json_path.open("w") as f:
             json.dump([equation.as_dict() for equation in self.equations], f, indent=4)
 
     @staticmethod
-    def from_json(filepath: Path, name:str = DEFAULT_NAME) -> "EquationSet":
-        # TODO: include name in JSON
+    def from_json(filepath: Path, name: str | None = None) -> "EquationSet":
+        if name is None:
+            name = filepath.stem.replace("_", " ")
         with filepath.open("r") as f:
             equations = [Equation.from_dict(elem) for elem in json.load(f)]
         return EquationSet(equations, name)
@@ -46,36 +60,41 @@ class Equation:
     """An equation with terms divided into left and right part"""
 
     def __init__(self, name: str, left: list["Term"], right: list["Term"]) -> None:
+        zero_term = Term("0", "0", "+")
         self.name = name
-        self.left = sorted(left, key=lambda term: term.value)
-        self.right = sorted(right, key=lambda term: term.value)
+        # empty sides default to zero-term
+        if not left:
+            left = [zero_term]
+        if not right:
+            right = [zero_term]
+        self.left = sorted(left, key=lambda t: t.latex_code)
+        self.right = sorted(right, key=lambda t: t.latex_code)
 
     def __repr__(self) -> str:
-        return (f"Equation(\"{self.name}\": "
-                + " ".join(str(term) for term in self.left)
-                + " = "
-                + " ".join(str(term) for term in self.right)
-                + ")"
-                )
+        left_terms = " ".join(str(t) for t in self.left)
+        right_terms = " ".join(str(t) for t in self.right)
+        return f'Equation("{self.name}": {left_terms} = {right_terms})'
+
+    def __eq__(self, other: "Equation") -> bool:
+        return self.left == other.left and self.right == other.right  # already sorted
 
     def get_all_terms(self) -> list["Term"]:
         return self.left + self.right
 
     def check_input(self, test_left: list["Term"], test_right: list["Term"]) -> bool:
-        return (
-                self._check_side(self.left, test_left)
-                and self._check_side(self.right, test_right)
+        return self._check_side(self.left, test_left) and self._check_side(
+            self.right, test_right
         )
 
-    def as_dict(self) -> dict:
-        return{
+    def as_dict(self) -> dict[str, str | list[dict[str, str]]]:
+        return {
             "name": self.name,
-            "left": [term.as_dict() for term in self.left],
-            "right": [term.as_dict() for term in self.right],
+            "left": [t.as_dict() for t in self.left],
+            "right": [t.as_dict() for t in self.right],
         }
 
     @staticmethod
-    def from_dict(data: dict) -> "Equation":
+    def from_dict(data: dict[str, str | list[dict[str, str]]]) -> "Equation":
         return Equation(
             data["name"],
             [Term.from_dict(elem) for elem in data["left"]],
@@ -84,104 +103,105 @@ class Equation:
 
     @staticmethod
     def _check_side(self_side: list["Term"], test_side: list["Term"]) -> bool:
-        return all(
-            [
-                self_term == test_term
-                for self_term, test_term in zip(
-                self_side, sorted(test_side, key=lambda term: term.value)
+        return (
+            False
+            if len(self_side) != len(test_side)
+            else all(
+                [
+                    self_term == test_term
+                    for self_term, test_term in zip(
+                        self_side, sorted(test_side, key=lambda t: t.latex_code)
+                    )
+                ]
             )
-            ]
         )
 
 
 class Term:
     """Part of an Equation"""
 
-    def __init__(self, name: str, value: str, sign: str = "+") -> None:
+    def __init__(
+        self, name: str, latex_code: str, sign: str = "+", sprite_id: str | None = None
+    ) -> None:
         self.name = name
-        if sign in ("+", "-"):
-            self.sign = sign
-        else:
-            raise ValueError("Invalid sign. Must be \"+\" (plus) or \"-\" (minus).")
-        self.value = value
+        if sign not in ("+", "-"):
+            raise ValueError('Invalid sign. Must be "+" (plus) or "-" (minus).')
+        self.sign = sign
+        self.latex_code = latex_code
+        # ensure unique sprite_id based on sign and latex_code if not provided
+        full_latex_code = "".join([self.sign, self.latex_code])  # no f-string bc of {}
+        self.sprite_id = sprite_id or hashlib.sha1(full_latex_code.encode()).hexdigest()
+        # check if sprite exists
+        if not self.get_sprite_path().exists():
+            # create sprite
+            fig, ax = plt.subplots(figsize=(1, 1), dpi=100)
+            try:
+                ax.text(
+                    0.5,
+                    0.5,
+                    "".join(["$", full_latex_code, "$"]),
+                    fontsize=20,
+                    ha="center",
+                    va="center",
+                )
+            except Exception as e:
+                raise ValueError(f"Invalid LaTeX code: {latex_code}") from e
+            ax.axis("off")
+            plt.savefig(
+                self.get_sprite_path(),
+                bbox_inches="tight",
+                pad_inches=0.1,
+                transparent=True,
+            )
+            plt.close(fig)
 
     def __repr__(self) -> str:
-        return f"Term(\"{self.name}\": {self.sign} {self.value})"
+        return f'Term("{self.name}": {self.sign} {self.latex_code})'
 
     def __str__(self) -> str:
-        return f"{self.sign} {self.value}"
+        return f"{self.sign} {self.latex_code}"
 
     def __eq__(self, other: "Term") -> bool:
         # Currently, .name does not need to be the same
-        return self.sign == other.sign and self.value == other.value
+        return self.sign == other.sign and self.latex_code == other.latex_code
 
-    def as_dict(self) -> dict:
+    def get_sprite_path(self) -> Path:
+        return SPRITE_DIR / f"{self.sprite_id}.png"
+
+    def as_dict(self) -> dict[str, str | None]:
         return {
             "name": self.name,
             "sign": self.sign,
-            "value": self.value,
+            "latex_code": self.latex_code,
+            "sprite_id": self.sprite_id,
         }
 
     @staticmethod
-    def from_dict(data: dict) -> "Term":
+    def from_dict(data: dict[str, str]) -> "Term":
         return Term(
             name=data["name"],
-            value=data["value"],
-            sign=data["sign"],
+            latex_code=data["latex_code"],
+            sign=data["sign"] if "sign" in data else "+",
+            sprite_id=data.get("sprite_id") if "sprite_id" in data else None,
         )
 
 
-# just for testing and as example
 if __name__ == "__main__":
-    PROJECT_ROOT = Path(__file__).resolve().parents[2]
-    JSON_TEST_PATH = PROJECT_ROOT / "data" / "equations.json"
-    p = Term("pressure",
-             "p",
-             "+")
-    rho_R_T = Term(
-        "density, specific gas constant, temperature",
-        r"\rho R T",
-        "+")
-    ideal_gas_law_meteo = Equation(
-        "ideal gas law for meteorology",
-        [p],
-        [rho_R_T])
-    dp_dz = Term(
-        "vertical pressure gradient",
-        r"\frac{\operatorname{d} p}{\operatorname{d} z",
-        "+")
-    rho_g = Term(
-        "density, gravitational acceleration",
-        r"\rho g",
-        "-")
-    hydrostatic_equation = Equation(
-        "hydrostatic equation",
-        [dp_dz],
-        [rho_g])
-    dU = Term(
-        "total differential of inner energy",
-        r"\operatorname{d} U",
-        "+")
-    delQ = Term(
-        "partial differential of heat",
-        r"\partial Q",
-        "+")
-    delW = Term(
-        "partial differential of work",
-        r"\partial W",
-        "+")
-    first_law = Equation(
-        "first law of thermodynamics",
-        [dU],
-        [delQ, delW])
-    my_equations = EquationSet([ideal_gas_law_meteo, hydrostatic_equation, first_law])
-    print(my_equations)
-    for eq in my_equations.equations:
-        print(eq)
-    my_equations.to_json(JSON_TEST_PATH)
-    with JSON_TEST_PATH.open("r") as file:
-        json_data = json.load(file)
-        print(json_data)
-    my_new_equations = EquationSet.from_json(JSON_TEST_PATH, "new_equations")
-    print(my_new_equations)
-    print(my_equations == my_new_equations)  # FIXME: should return True...
+    # Example usage
+    term1 = Term("x^2", "x^2")
+    term2 = Term("yp/pi", r"\frac{yp}{\pi}", "-")
+    term3 = Term("dp/dz", r"\frac{\operatorname{d} p}{\operatorname{d} z}")
+    for term in (term1, term2, term3):
+        print(term.get_sprite_path())
+    equation1 = Equation("ExampleEquation1", [term1], [term2])
+    equation2 = Equation("ExampleEquation2", [term1, term2], [term3])
+    equation_set1 = EquationSet([equation1, equation2], "second equation set example")
+    equation_set2 = EquationSet.from_json(JSON_DIR / "equation_set_example.json")
+    print(equation_set1.equations)
+    print(equation_set2.equations)
+    print(equation_set1 == equation_set2)
+    equation_set1.to_json()
+    equation_set1_reload = EquationSet.from_json(
+        JSON_DIR / "second_equation_set_example.json"
+    )
+    print(equation_set1 == equation_set1_reload)

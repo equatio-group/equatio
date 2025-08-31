@@ -1,5 +1,11 @@
+# png files
+*.png
+
 # virtual env
 .venv/*
 
 # IDE settings (PyCharm)
 .idea/*
+
+# python cache
+__pycache__/
