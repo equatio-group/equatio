@@ -5,7 +5,9 @@ import pytest
 
 from src.equatio.equation import Term, Equation, EquationSet
 
-# Test Terms and their corresponding dictionaries
+# Very impressive!
+
+# Test Terms and their corresponding dictionaries  # comment not necessary, and please use CONSTANT_NAMING.
 t_p1 = Term("pressure", "p", "+")
 t_p1_dict = {
     "name": "pressure",
