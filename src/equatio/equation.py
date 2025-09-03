@@ -11,13 +11,13 @@ _DATA_DIR = Path(__file__).parents[2]
 JSON_DIR = _DATA_DIR / "data"
 SPRITE_DIR = _DATA_DIR / "sprites"
 
+_DEFAULT_NAME = "MyEquations"
 
+# Maybe split module into three separate ones. One per class. This reduces the scrolling and overload on the reader. "What might be connected how in between?". Module separation clears this up.
 class EquationSet:
     """A collection of equation objects."""
 
-    DEFAULT_NAME = "MyEquations"
-
-    def __init__(self, equations: list[Equation], name: str = DEFAULT_NAME) -> None:
+    def __init__(self, equations: list[Equation], name: str = _DEFAULT_NAME) -> None:
         self.name = name
         unique_equations = []
         for equation in equations:  # nice!
