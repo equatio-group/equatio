@@ -6,45 +6,50 @@ import pytest
 from src.equatio.equation import Term, Equation, EquationSet
 
 # Test Terms and their corresponding dictionaries
-t_p1 = Term("pressure", "p", "+")
-t_p1_dict = {
+T_P1 = Term("pressure", "p", "+")
+T_P1_DICT = {
     "name": "pressure",
     "latex_code": "p",
     "sign": "+",
 }
-t_p2 = Term("more_pressure", "p", "+")
-t_p2_dict = {
+T_P2 = Term("more_pressure", "p", "+")
+T_P2_DICT = {
     "name": "more_pressure",
-    # no sign to check if default works
+    "sign": "+",
     "latex_code": "p",
 }
-t_p3 = Term("pressure", "p", "-")
-t_p3_dict = {
+T_P3 = Term("pressure", "p", "-")
+T_P3_DICT = {
     "latex_code": "p",
     "name": "pressure",
     "sign": "-",
 }
-t_p4 = Term("less_pressure", "p", "-")
-t_p4_dict = {
+T_P4 = Term("less_pressure", "p", "-")
+T_P4_DICT = {
     "sign": "-",
     "latex_code": "p",
     "name": "less_pressure",
 }
-
+T_P5_SIGN_ERROR = Term("more_pressure", "p", "+")
+T_P5_SIGN_ERROR_DICT = {
+    "name": "more_pressure",
+    # no sign to check if error is raised
+    "latex_code": "p",
+}
 
 @pytest.mark.parametrize(
     "t1, t2, result",
     [
-        (t_p1, t_p2, True),
-        (t_p1, t_p3, False),
-        (t_p1, t_p4, False),
-        (t_p2, t_p3, False),
-        (t_p2, t_p4, False),
-        (t_p3, t_p4, True),
+        (T_P1, T_P2, True),
+        (T_P1, T_P3, False),
+        (T_P1, T_P4, False),
+        (T_P2, T_P3, False),
+        (T_P2, T_P4, False),
+        (T_P3, T_P4, True),
     ],
 )
 def test_term_equality(t1: Term, t2: Term, result: bool) -> None:
-    """test equality overload for Term"""
+    """Test equality overload for Term."""
     assert result == (t1 == t2)
 
 
@@ -57,53 +62,53 @@ def test_term_equality(t1: Term, t2: Term, result: bool) -> None:
     ],
 )
 def test_term_invalid_sign_handling(name: str, latex_code: str, sign: str) -> None:
-    """test error handling for invalid signs in Term constructor"""
+    """Test error handling for invalid signs in Term constructor."""
     with pytest.raises(ValueError):
         Term(name, latex_code, sign)
 
 
-@pytest.mark.parametrize("t", [t_p1, t_p2, t_p3, t_p4])
+@pytest.mark.parametrize("t", [T_P1, T_P2, T_P3, T_P4])
 def test_term_dict_cycle(t: Term) -> None:
-    """test if as_dicht() and from_dict() cycle to same Term"""
+    """Test if as_dicht() and from_dict() cycle to same Term."""
     assert t == Term.from_dict(t.as_dict())
 
 
 @pytest.mark.parametrize(
     "t, t_dict",
     [
-        (t_p1, t_p1_dict),
+        (T_P1, T_P1_DICT),
         # no test for case 2 because dict does not use sign (to test for default value)
-        (t_p3, t_p3_dict),
-        (t_p4, t_p4_dict),
+        (T_P3, T_P3_DICT),
+        (T_P4, T_P4_DICT),
     ],
 )
 def test_term_as_dict(t: Term, t_dict: dict[str, str]) -> None:
-    """test Term conversion to dictionary"""
+    """Test Term conversion to dictionary."""
     assert t.as_dict() == t_dict
 
 
 @pytest.mark.parametrize(
     "t_dict, t",
     [
-        (t_p1_dict, t_p1),
-        (t_p2_dict, t_p2),
-        (t_p3_dict, t_p3),
-        (t_p4_dict, t_p4),
+        (T_P1_DICT, T_P1),
+        (T_P2_DICT, T_P2),
+        (T_P3_DICT, T_P3),
+        (T_P4_DICT, T_P4),
     ],
 )
 def test_term_from_dict(t_dict: dict[str, str], t: Term) -> None:
-    """test Term constructor from dictionary"""
+    """Test Term constructor from dictionary."""
     assert t.from_dict(t_dict) == t
 
 
 # Test equations and their corresponding dictionaries
 # ideal gas law for meteorology
-p = Term("pressure", "p", "+")
-rho_R_T = Term("density, specific gas constant, temperature", r"\rho R T", "+")
-gas_law_terms = [rho_R_T, p]  # not in order of left - right
-gas_law = Equation("ideal gas law for meteorology", [p], [rho_R_T])
-next_gas_law = Equation("ideal gas law (not only) for meteorology", [p], [rho_R_T])
-gas_law_dict = {
+P = Term("pressure", "p", "+")
+RHO_R_T = Term("density, specific gas constant, temperature", r"\rho R T", "+")
+GAS_LAW_TERMS = [RHO_R_T, P]  # not in order of left - right
+GAS_LAW = Equation("ideal gas law for meteorology", [P], [RHO_R_T])
+NEXT_GAS_LAW = Equation("ideal gas law (not only) for meteorology", [P], [RHO_R_T])
+GAS_LAW_DICT = {
     "name": "ideal gas law for meteorology",
     "left": [{"name": "pressure", "latex_code": "p", "sign": "+"}],
     "right": [
@@ -115,16 +120,16 @@ gas_law_dict = {
     ],
 }
 # hydrostatic equation
-dp_dz = Term(
+DP_DZ = Term(
     "vertical pressure gradient",
     r"\frac{\operatorname{d} p}{\operatorname{d} z}",
     "+",
 )
-rho_g = Term("density, gravitational acceleration", r"\rho g", "-")
-hydrostatic_terms = [dp_dz, rho_g]
-hydrostatic = Equation("hydrostatic equation", [dp_dz], [rho_g])
-hydrostatic_wrong_sides = Equation("hydrostatic equation", [rho_g], [dp_dz])
-hydrostatic_dict = {
+RHO_G = Term("density, gravitational acceleration", r"\rho g", "-")
+HYDROSTATIC_TERMS = [DP_DZ, RHO_G]
+HYDROSTATIC = Equation("hydrostatic equation", [DP_DZ], [RHO_G])
+HYDROSTATIC_WRONG_SITES = Equation("hydrostatic equation", [RHO_G], [DP_DZ])
+HYDROSTATIC_DICT = {
     "name": "hydrostatic equation",
     "left": [
         {
@@ -141,13 +146,13 @@ hydrostatic_dict = {
     ],
 }
 # first law of thermodynamics
-dU = Term("total differential of inner energy", r"\operatorname{d} U", "+")
-delQ = Term("partial differential of heat", r"\partial Q", "+")
-delW = Term("partial differential of work", r"\partial W", "+")
-first_law_terms = [dU, delQ, delW]
-first_law = Equation("first law of thermodynamics", [dU], [delQ, delW])
-first_law_other_order = Equation("first law of thermodynamics", [dU], [delW, delQ])
-first_law_dict = {
+D_U = Term("total differential of inner energy", r"\operatorname{d} U", "+")
+DEL_Q = Term("partial differential of heat", r"\partial Q", "+")
+DEL_W = Term("partial differential of work", r"\partial W", "+")
+FIRST_LAW_TERMS = [D_U, DEL_Q, DEL_W]
+FIRST_LAW = Equation("first law of thermodynamics", [D_U], [DEL_Q, DEL_W])
+FIRST_LAW_OTHER_ORDER = Equation("first law of thermodynamics", [D_U], [DEL_W, DEL_Q])
+FIRST_LAW_DICT = {
     "name": "first law of thermodynamics",
     "left": [
         {
@@ -174,12 +179,12 @@ first_law_dict = {
 @pytest.mark.parametrize(
     "e1, e2, result",
     [
-        (gas_law, next_gas_law, True),
-        (hydrostatic, hydrostatic_wrong_sides, False),  # wrong sides
+        (GAS_LAW, NEXT_GAS_LAW, True),
+        (HYDROSTATIC, HYDROSTATIC_WRONG_SITES, False),  # wrong sides
         (
-            first_law,
-            first_law_other_order,
-            True,
+                FIRST_LAW,
+                FIRST_LAW_OTHER_ORDER,
+                True,
         ),  # other order within sides should not matter
     ],
 )
@@ -190,17 +195,17 @@ def test_equation_equality(e1: Equation, e2: Equation, result: bool) -> None:
 @pytest.mark.parametrize(
     "e, terms, result",
     [
-        (gas_law, gas_law_terms, True),
-        (hydrostatic, hydrostatic_terms, True),
-        (first_law, first_law_terms, True),
-        (gas_law, hydrostatic_terms, False),
-        (hydrostatic, first_law_terms, False),
-        (first_law, gas_law_terms, False),
+        (GAS_LAW, GAS_LAW_TERMS, True),
+        (HYDROSTATIC, HYDROSTATIC_TERMS, True),
+        (FIRST_LAW, FIRST_LAW_TERMS, True),
+        (GAS_LAW, HYDROSTATIC_TERMS, False),
+        (HYDROSTATIC, FIRST_LAW_TERMS, False),
+        (FIRST_LAW, GAS_LAW_TERMS, False),
     ],
 )
 def test_equation_get_items(e: Equation, terms: list[Term], result: bool) -> None:
     assert result == (
-        sorted(e.get_all_terms(), key=lambda term: term.latex_code)
+        sorted(e.all_terms, key=lambda term: term.latex_code)
         == sorted(terms, key=lambda term: term.latex_code)
     )
 
@@ -208,20 +213,20 @@ def test_equation_get_items(e: Equation, terms: list[Term], result: bool) -> Non
 @pytest.mark.parametrize(
     "e, left_test, right_test, result",
     [
-        (gas_law, gas_law_terms[0:1], gas_law_terms[1:2], False),
-        (gas_law, gas_law_terms[1:2], gas_law_terms[0:1], True),
-        (gas_law, gas_law_terms, hydrostatic_terms, False),
-        (hydrostatic, hydrostatic_terms[0:1], hydrostatic_terms[1:2], True),
+        (GAS_LAW, GAS_LAW_TERMS[0:1], GAS_LAW_TERMS[1:2], False),
+        (GAS_LAW, GAS_LAW_TERMS[1:2], GAS_LAW_TERMS[0:1], True),
+        (GAS_LAW, GAS_LAW_TERMS, HYDROSTATIC_TERMS, False),
+        (HYDROSTATIC, HYDROSTATIC_TERMS[0:1], HYDROSTATIC_TERMS[1:2], True),
         (
-            hydrostatic_wrong_sides,
-            hydrostatic_terms[0:1],
-            hydrostatic_terms[1:2],
-            False,
+                HYDROSTATIC_WRONG_SITES,
+                HYDROSTATIC_TERMS[0:1],
+                HYDROSTATIC_TERMS[1:2],
+                False,
         ),
-        (hydrostatic_wrong_sides, hydrostatic_terms[1:2], hydrostatic_terms[0:1], True),
-        (first_law, first_law_terms[0:1], first_law_terms[1:2], False),
-        (first_law, first_law_terms[0:1], first_law_terms[1:3], True),
-        (first_law_other_order, first_law_terms[0:1], first_law_terms[1:3], True),
+        (HYDROSTATIC_WRONG_SITES, HYDROSTATIC_TERMS[1:2], HYDROSTATIC_TERMS[0:1], True),
+        (FIRST_LAW, FIRST_LAW_TERMS[0:1], FIRST_LAW_TERMS[1:2], False),
+        (FIRST_LAW, FIRST_LAW_TERMS[0:1], FIRST_LAW_TERMS[1:3], True),
+        (FIRST_LAW_OTHER_ORDER, FIRST_LAW_TERMS[0:1], FIRST_LAW_TERMS[1:3], True),
     ],
 )
 def test_equation_check_input(
@@ -232,28 +237,28 @@ def test_equation_check_input(
 
 @pytest.mark.parametrize(
     "e",
-    [gas_law, hydrostatic, hydrostatic_wrong_sides, first_law, first_law_other_order],
+    [GAS_LAW, HYDROSTATIC, HYDROSTATIC_WRONG_SITES, FIRST_LAW, FIRST_LAW_OTHER_ORDER],
 )
-def test_eqation_dict_cycle(e: Equation) -> None:
+def test_equation_dict_cycle(e: Equation) -> None:
     assert e == Equation.from_dict(e.as_dict())
 
 
 @pytest.mark.parametrize(
     "e, e_dict, result",
     [
-        (gas_law, gas_law_dict, True),
-        (gas_law, hydrostatic_dict, False),
-        (hydrostatic, hydrostatic_dict, False),  # sign is missing in hydrostatic_dict
-        (hydrostatic_wrong_sides, hydrostatic_dict, False),
+        (GAS_LAW, GAS_LAW_DICT, True),
+        (GAS_LAW, HYDROSTATIC_DICT, False),
+        (HYDROSTATIC, HYDROSTATIC_DICT, False),  # sign is missing in hydrostatic_dict
+        (HYDROSTATIC_WRONG_SITES, HYDROSTATIC_DICT, False),
         (
-            first_law,
-            first_law_dict,
-            False,
+                FIRST_LAW,
+                FIRST_LAW_DICT,
+                False,
         ),  # other (alphabetically wrong) order in dict
         (
-            first_law_other_order,
-            first_law_dict,
-            False,
+                FIRST_LAW_OTHER_ORDER,
+                FIRST_LAW_DICT,
+                False,
         ),  # same here although order in constructor and dict are the same (gets sorted during construction)
     ],
 )
@@ -264,12 +269,12 @@ def test_equation_as_dict(e: Equation, e_dict: dict, result: bool) -> None:
 @pytest.mark.parametrize(
     "e_dict, e, result",
     [
-        (gas_law_dict, gas_law, True),
-        (gas_law_dict, hydrostatic, False),
-        (hydrostatic_dict, hydrostatic, True),  # missing sign should be added
-        (hydrostatic_dict, hydrostatic_wrong_sides, False),
-        (first_law_dict, first_law, True),  # other order in dict shoud work fine
-        (first_law_dict, first_law_other_order, True),
+        (GAS_LAW_DICT, GAS_LAW, True),
+        (GAS_LAW_DICT, HYDROSTATIC, False),
+        (HYDROSTATIC_DICT, HYDROSTATIC, True),  # missing sign should be added
+        (HYDROSTATIC_DICT, HYDROSTATIC_WRONG_SITES, False),
+        (FIRST_LAW_DICT, FIRST_LAW, True),  # other order in dict should work fine
+        (FIRST_LAW_DICT, FIRST_LAW_OTHER_ORDER, True),
     ],
 )
 def test_equation_from_dict(e_dict: dict, e: Equation, result: bool) -> None:
@@ -277,28 +282,28 @@ def test_equation_from_dict(e_dict: dict, e: Equation, result: bool) -> None:
 
 
 # Test EquationSets
-one_equation_set = EquationSet([gas_law], "one term set")
-same_one_equation_set = EquationSet([gas_law])  # with default name
-other_one_equation_set = EquationSet([first_law], "other one term set")
-false_two_equation_set = EquationSet(
-    [first_law, first_law_other_order], "one term set"
+ONE_EQUATION_SET = EquationSet([GAS_LAW], "one term set")
+SAME_ONE_EQUATION_SET = EquationSet([GAS_LAW])  # with default name
+OTHER_ONE_EQUATION_SET = EquationSet([FIRST_LAW], "other one term set")
+FALSE_TWO_EQUATION_SET = EquationSet(
+    [FIRST_LAW, FIRST_LAW_OTHER_ORDER], "one term set"
 )  # should only yield one equation in set
-very_basic_equation_set = EquationSet([gas_law, hydrostatic], "basic equations")
-very_basic_equation_set_other_way_round = EquationSet(
-    [hydrostatic, gas_law], "basic equations"
+VERY_BASIC_EQUATION_SET = EquationSet([GAS_LAW, HYDROSTATIC], "basic equations")
+VERY_BASIC_EQUATION_SET_OTHER_WAY_ROUND = EquationSet(
+    [HYDROSTATIC, GAS_LAW], "basic equations"
 )
-basic_equation_set = EquationSet([gas_law, hydrostatic, first_law], "basic equations")
+BASIC_EQUATION_SET = EquationSet([GAS_LAW, HYDROSTATIC, FIRST_LAW], "basic equations")
 
 
 @pytest.mark.parametrize(
     "es1, es2, result",
     [
-        (one_equation_set, one_equation_set, True),
-        (one_equation_set, same_one_equation_set, True),
-        (other_one_equation_set, false_two_equation_set, True),
-        (one_equation_set, other_one_equation_set, False),
-        (very_basic_equation_set, very_basic_equation_set_other_way_round, True),
-        (very_basic_equation_set, basic_equation_set, False),
+        (ONE_EQUATION_SET, ONE_EQUATION_SET, True),
+        (ONE_EQUATION_SET, SAME_ONE_EQUATION_SET, True),
+        (OTHER_ONE_EQUATION_SET, FALSE_TWO_EQUATION_SET, True),
+        (ONE_EQUATION_SET, OTHER_ONE_EQUATION_SET, False),
+        (VERY_BASIC_EQUATION_SET, VERY_BASIC_EQUATION_SET_OTHER_WAY_ROUND, True),
+        (VERY_BASIC_EQUATION_SET, BASIC_EQUATION_SET, False),
     ],
 )
 def test_equation_set_equality(
@@ -310,9 +315,9 @@ def test_equation_set_equality(
 @pytest.mark.parametrize(
     "es, e",
     [
-        (one_equation_set, hydrostatic),
-        (very_basic_equation_set, first_law),
-        (basic_equation_set, hydrostatic_wrong_sides),
+        (ONE_EQUATION_SET, HYDROSTATIC),
+        (VERY_BASIC_EQUATION_SET, FIRST_LAW),
+        (BASIC_EQUATION_SET, HYDROSTATIC_WRONG_SITES),
     ],
 )
 def test_equation_set_add_remove_cycle(es: EquationSet, e: Equation) -> None:
@@ -325,9 +330,9 @@ def test_equation_set_add_remove_cycle(es: EquationSet, e: Equation) -> None:
 @pytest.mark.parametrize(
     "es, e",
     [
-        (one_equation_set, gas_law),
-        (very_basic_equation_set, hydrostatic),
-        (basic_equation_set, first_law),
+        (ONE_EQUATION_SET, GAS_LAW),
+        (VERY_BASIC_EQUATION_SET, HYDROSTATIC),
+        (BASIC_EQUATION_SET, FIRST_LAW),
     ],
 )
 def test_equation_set_remove_add_cycle(es: EquationSet, e: Equation) -> None:
@@ -340,9 +345,9 @@ def test_equation_set_remove_add_cycle(es: EquationSet, e: Equation) -> None:
 @pytest.mark.parametrize(
     "es, e_to_remove, es_new",
     [
-        (very_basic_equation_set, hydrostatic, one_equation_set),
-        (basic_equation_set, first_law, very_basic_equation_set),
-        (basic_equation_set, first_law, very_basic_equation_set_other_way_round),
+        (VERY_BASIC_EQUATION_SET, HYDROSTATIC, ONE_EQUATION_SET),
+        (BASIC_EQUATION_SET, FIRST_LAW, VERY_BASIC_EQUATION_SET),
+        (BASIC_EQUATION_SET, FIRST_LAW, VERY_BASIC_EQUATION_SET_OTHER_WAY_ROUND),
     ],
 )
 def test_equation_set_remove(
@@ -356,9 +361,9 @@ def test_equation_set_remove(
 @pytest.mark.parametrize(
     "es, e_to_add, es_new",
     [
-        (one_equation_set, hydrostatic, very_basic_equation_set),
-        (very_basic_equation_set, first_law, basic_equation_set),
-        (very_basic_equation_set_other_way_round, first_law, basic_equation_set),
+        (ONE_EQUATION_SET, HYDROSTATIC, VERY_BASIC_EQUATION_SET),
+        (VERY_BASIC_EQUATION_SET, FIRST_LAW, BASIC_EQUATION_SET),
+        (VERY_BASIC_EQUATION_SET_OTHER_WAY_ROUND, FIRST_LAW, BASIC_EQUATION_SET),
     ],
 )
 def test_equation_set_add(
@@ -370,7 +375,7 @@ def test_equation_set_add(
 
 
 # Test JSON import/export
-@pytest.fixture(params=[one_equation_set, very_basic_equation_set, basic_equation_set])
+@pytest.fixture(params=[ONE_EQUATION_SET, VERY_BASIC_EQUATION_SET, BASIC_EQUATION_SET])
 def equation_set(request) -> EquationSet:
     return request.param
 
