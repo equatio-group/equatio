@@ -119,7 +119,7 @@ class Equation:
 
     @staticmethod
     def _check_side(self_side: list[Term], test_side: list[Term]) -> bool:
-        return len(self_side) == len(test_side) or all(
+        return len(self_side) == len(test_side) and all(
             [
                 self_term == test_term
                 for self_term, test_term in zip(
