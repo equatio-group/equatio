@@ -71,6 +71,23 @@ def test_term_invalid_sign_handling(name: str, latex_code: str, sign: str) -> No
         Term(name, latex_code, sign)
 
 
+@pytest.mark.parametrize(
+    "t1, t2, result",
+    [
+        (T_P1, T_P2, True),
+        (T_P1, T_P3, False),
+        (T_P1, T_P4, False),
+        (T_P2, T_P3, False),
+        (T_P2, T_P4, False),
+        (T_P3, T_P4, True),
+        (Term("test", r"\frac{1}{2}a", "+"), Term("test2", r"\frac{a}{2}", "+"), False),  # mathematically same but different latex -> different sprite_id
+    ],
+)
+def test_term_sprite_path_for_same_latex(t1, t2, result) -> None:
+    """Test if (only) terms with same full latex code yield same sprite path."""
+    assert result == (t1.get_sprite_path() == t2.get_sprite_path())
+
+
 @pytest.mark.parametrize("t", [T_P1, T_P2, T_P3, T_P4])
 def test_term_dict_cycle(t: Term) -> None:
     """Test if as_dicht() and from_dict() cycle to same Term."""
