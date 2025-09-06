@@ -1,41 +1,45 @@
 from copy import deepcopy
+import hashlib
 import json
 from pathlib import Path
 import pytest
 
 from src.equatio.equation import Term, Equation, EquationSet
 
+
+def term_dict_add_sprite_id_for_testing(term_dict: dict[str, str]) -> dict[str, str]:
+    """Add a sprite_id to a term dictionary based on its content."""
+    sprite_id: str = hashlib.sha1("".join([term_dict["sign"], term_dict["latex_code"]]).encode()).hexdigest()
+    term_dict_with_id = term_dict.copy()
+    term_dict_with_id["sprite_id"] = sprite_id
+    return term_dict_with_id
+
+
 # Test Terms and their corresponding dictionaries
 T_P1 = Term("pressure", "p", "+")
-T_P1_DICT = {
+T_P1_DICT = term_dict_add_sprite_id_for_testing({
     "name": "pressure",
     "latex_code": "p",
     "sign": "+",
-}
+})
 T_P2 = Term("more_pressure", "p", "+")
-T_P2_DICT = {
+T_P2_DICT = term_dict_add_sprite_id_for_testing({
     "name": "more_pressure",
     "sign": "+",
     "latex_code": "p",
-}
+})
 T_P3 = Term("pressure", "p", "-")
-T_P3_DICT = {
+T_P3_DICT = term_dict_add_sprite_id_for_testing({
     "latex_code": "p",
     "name": "pressure",
     "sign": "-",
-}
+})
 T_P4 = Term("less_pressure", "p", "-")
-T_P4_DICT = {
+T_P4_DICT = term_dict_add_sprite_id_for_testing({
     "sign": "-",
     "latex_code": "p",
     "name": "less_pressure",
-}
-T_P5_SIGN_ERROR = Term("more_pressure", "p", "+")
-T_P5_SIGN_ERROR_DICT = {
-    "name": "more_pressure",
-    # no sign to check if error is raised
-    "latex_code": "p",
-}
+})
 
 @pytest.mark.parametrize(
     "t1, t2, result",
@@ -110,13 +114,13 @@ GAS_LAW = Equation("ideal gas law for meteorology", [P], [RHO_R_T])
 NEXT_GAS_LAW = Equation("ideal gas law (not only) for meteorology", [P], [RHO_R_T])
 GAS_LAW_DICT = {
     "name": "ideal gas law for meteorology",
-    "left": [{"name": "pressure", "latex_code": "p", "sign": "+"}],
-    "right": [
+    "left": [term_dict_add_sprite_id_for_testing({"name": "pressure", "latex_code": "p", "sign": "+"})],
+    "right": [term_dict_add_sprite_id_for_testing(
         {
             "name": "density, specific gas constant, temperature",
             "latex_code": r"\rho R T",
             "sign": "+",
-        }
+        })
     ],
 }
 # hydrostatic equation
@@ -135,14 +139,15 @@ HYDROSTATIC_DICT = {
         {
             "name": "vertical pressure gradient",
             "latex_code": r"\frac{\operatorname{d} p}{\operatorname{d} z}",
-        }
-    ],  # sign should default to "+"
-    "right": [
+            "sign": "+",
+        }  # no sprite_id to test if equality test will fail here as intended
+    ],
+    "right": [term_dict_add_sprite_id_for_testing(
         {
             "name": "density, gravitational acceleration",
             "latex_code": r"\rho g",
             "sign": "-",
-        }
+        })
     ],
 }
 # first law of thermodynamics
@@ -154,24 +159,24 @@ FIRST_LAW = Equation("first law of thermodynamics", [D_U], [DEL_Q, DEL_W])
 FIRST_LAW_OTHER_ORDER = Equation("first law of thermodynamics", [D_U], [DEL_W, DEL_Q])
 FIRST_LAW_DICT = {
     "name": "first law of thermodynamics",
-    "left": [
+    "left": [term_dict_add_sprite_id_for_testing(
         {
             "name": "total differential of inner energy",
             "latex_code": r"\operatorname{d} U",
             "sign": "+",
-        }
+        })
     ],
-    "right": [
+    "right": [term_dict_add_sprite_id_for_testing(
         {
             "name": "partial differential of work",
             "latex_code": r"\partial W",
             "sign": "+",
-        },
+        }), term_dict_add_sprite_id_for_testing(
         {
             "name": "partial differential of heat",
             "latex_code": r"\partial Q",
             "sign": "+",
-        },
+        }),
     ],  # other order
 }
 
@@ -248,7 +253,7 @@ def test_equation_dict_cycle(e: Equation) -> None:
     [
         (GAS_LAW, GAS_LAW_DICT, True),
         (GAS_LAW, HYDROSTATIC_DICT, False),
-        (HYDROSTATIC, HYDROSTATIC_DICT, False),  # sign is missing in hydrostatic_dict
+        (HYDROSTATIC, HYDROSTATIC_DICT, False),  # one sprite_id will default to None in hydrostatic_dict
         (HYDROSTATIC_WRONG_SITES, HYDROSTATIC_DICT, False),
         (
                 FIRST_LAW,
@@ -407,16 +412,16 @@ def test_equation_set_from_json_manual(tmp_path):
     file = tmp_path / "eq.json"
     test_eq1_dict: dict[str, str | list[dict[str, str]]] = {
         "name": "eq1",
-        "left": [{"name": "a", "sign": "+", "latex_code": "a"}],
-        "right": [{"name": "b", "sign": "-", "latex_code": "b"}],
+        "left": [term_dict_add_sprite_id_for_testing({"name": "a", "sign": "+", "latex_code": "a"})],
+        "right": [term_dict_add_sprite_id_for_testing({"name": "b", "sign": "-", "latex_code": "b"})],
     }
     test_eq2_dict: dict[str, str | list[dict[str, str]]] = {
         "name": "eq2",
         "left": [
-            {"name": "c", "sign": "+", "latex_code": "c"},
-            {"name": "d", "sign": "-", "latex_code": "d"},
+            term_dict_add_sprite_id_for_testing({"name": "c", "sign": "+", "latex_code": "c"}),
+            term_dict_add_sprite_id_for_testing({"name": "d", "sign": "-", "latex_code": "d"}),
         ],
-        "right": [{"name": "e", "sign": "+", "latex_code": "e"}],
+        "right": [term_dict_add_sprite_id_for_testing({"name": "e", "sign": "+", "latex_code": "e"})],
     }
     file.write_text(
         json.dumps(
