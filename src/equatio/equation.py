@@ -110,10 +110,10 @@ class Equation:
     def __init__(self, name: str, left: list[Term], right: list[Term]) -> None:
         """Initialise with name, left side terms, and right side terms.
         Empty sides default to a zero term. Sort terms for each side by latex_code."""
-        ZEREO_TERM = Term("0", "0", "+")
+        ZERO_TERM = Term("0", "0", "+")
         self.name = name
-        self.left = sorted(left or [ZEREO_TERM], key=lambda t: t.latex_code)
-        self.right = sorted(right or [ZEREO_TERM], key=lambda t: t.latex_code)
+        self.left = sorted(left or [ZERO_TERM], key=lambda t: t.latex_code)
+        self.right = sorted(right or [ZERO_TERM], key=lambda t: t.latex_code)
 
     def __str__(self) -> str:
         """String representation of the equation."""
@@ -217,7 +217,7 @@ class Term:
 
     def __eq__(self, other: Any) -> bool:
         """Check equality with another Term based on sign and LaTeX code,
-        (currentyl) ignoring name. Sprite ID will be the same if sign and LaTeX code
+        (currently) ignoring name. Sprite ID will be the same if sign and LaTeX code
         are the same."""
         if not isinstance(other, Term):
             return False
