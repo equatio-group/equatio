@@ -204,21 +204,48 @@ class Term:
 
 # TODO: remove in final solution
 if __name__ == "__main__":
-    # Example usage
-    term1 = Term("x^2", "x^2", "+")
-    term2 = Term("yp/pi", r"\frac{yp}{\pi}", "-")
-    term3 = Term("dp/dz", r"\frac{\operatorname{d} p}{\operatorname{d} z}", "+")
-    for term in (term1, term2, term3):
-        print(term.get_sprite_path())
-    equation1 = Equation("ExampleEquation1", [term1], [term2])
-    equation2 = Equation("ExampleEquation2", [term1, term2], [term3])
-    equation_set1 = EquationSet([equation1, equation2], "second equation set example")
-    equation_set2 = EquationSet.from_json(JSON_DIR / "equation_set_example.json")
-    print(equation_set1.equations)
-    print(equation_set2.equations)
-    print(equation_set1 == equation_set2)
-    equation_set1.to_json()
+    # Create terms for examples
+    # (would only be needed in version with equation editor or type-in solution)
+    TERM_1 = Term("x^2", "x^2", "+")
+    TERM_2 = Term("yp/pi", r"\frac{yp}{\pi}", "-")
+    TERM_3 = Term("dp/dz", r"\frac{\operatorname{d} p}{\operatorname{d} z}", "+")
+
+    # Create equations for examples
+    # (could be used to create equation after user pressed button "submit" e.g. to
+    # create equation and either add to user_set for later comparison to board_set or
+    # check directly if current user_equation is in board_set)
+    EQUATION_1 = Equation("ExampleEquation1", [TERM_1], [TERM_2])
+    EQUATION_2 = Equation("ExampleEquation2", [TERM_1, TERM_2], [TERM_3])
+
+    # Create equation sets as examples (from_json would be used at beginning of game,
+    # from_equations could be used to create user_set after user submitted equation(s))
+    EQUATION_SET_FROM_JSON = EquationSet.from_json(JSON_DIR / "equation_set_example.json")
+    EQUATION_SET_FROM_EQUATIONS = EquationSet([EQUATION_1, EQUATION_2], "ExampleSet")
+
+    # print equation sets (only for development, debugging, testing...)
+    print(f"{EQUATION_SET_FROM_EQUATIONS}\n")
+    print(f"{EQUATION_SET_FROM_JSON}\n")
+
+    # compare equation sets (could be used to check if user_set == board_set)
+    print(f"{EQUATION_SET_FROM_EQUATIONS == EQUATION_SET_FROM_JSON=}\n")
+
+    # check if equation is in set (could be used to check if user_equation in board_set)
+    print(f"{EQUATION_1 in EQUATION_SET_FROM_JSON.equations=}")
+    print(f"{EQUATION_2 in EQUATION_SET_FROM_EQUATIONS.equations=}\n")
+
+    # How to get sprites for terms of equation set (to display them on the board)
+    print("All sprite paths per term in EQUATION_SET_FROM_EQUATIONS:")
+    for term in EQUATION_SET_FROM_EQUATIONS.all_terms:
+        print(f"{term}: {term.get_sprite_path()}")
+    print()
+
+    # Save equation set to JSON (could be used temporarily to create standard_set.json
+    # such that it would be loadable afterwards bc it needs to meet the format specs)
+    EQUATION_SET_FROM_EQUATIONS.to_json()
+    # or if you would like to change the name:
+    EQUATION_SET_FROM_EQUATIONS.to_json(JSON_DIR / "standard_set.json")
+    # now if you reload the equation set from JSON...
     equation_set1_reload = EquationSet.from_json(
         JSON_DIR / "second_equation_set_example.json"
     )
-    print(equation_set1 == equation_set1_reload)
+
