@@ -248,4 +248,5 @@ if __name__ == "__main__":
     equation_set1_reload = EquationSet.from_json(
         JSON_DIR / "second_equation_set_example.json"
     )
-
+    # ...it should be the same as before
+    print(f"{EQUATION_SET_FROM_EQUATIONS == equation_set1_reload=}")
