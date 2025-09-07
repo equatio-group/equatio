@@ -1,3 +1,6 @@
+# Unit tests for Term, Equation, and EquationSet classes in src.equatio.equation
+
+
 from copy import deepcopy
 import hashlib
 import json
@@ -7,6 +10,7 @@ import pytest
 from src.equatio.equation import Term, Equation, EquationSet
 
 
+# Helper function
 def term_dict_add_sprite_id_for_testing(term_dict: dict[str, str]) -> dict[str, str]:
     """Add a sprite_id to a term dictionary based on its content."""
     sprite_id: str = hashlib.sha1(
@@ -17,7 +21,7 @@ def term_dict_add_sprite_id_for_testing(term_dict: dict[str, str]) -> dict[str, 
     return term_dict_with_id
 
 
-# Test Terms and their corresponding dictionaries
+# TERM TESTS
 T_P1 = Term("pressure", "p", "+")
 T_P1_DICT = term_dict_add_sprite_id_for_testing(
     {
@@ -137,7 +141,7 @@ def test_term_from_dict(t_dict: dict[str, str], t: Term) -> None:
     assert t.from_dict(t_dict) == t
 
 
-# Test equations and their corresponding dictionaries
+# EQUATION TESTS
 # ideal gas law for meteorology
 P = Term("pressure", "p", "+")
 RHO_R_T = Term("density, specific gas constant, temperature", r"\rho R T", "+")
@@ -240,6 +244,7 @@ FIRST_LAW_DICT = {
     ],
 )
 def test_equation_equality(e1: Equation, e2: Equation, result: bool) -> None:
+    """Test equality overload for Equation."""
     assert result == (e1 == e2)
 
 
@@ -255,6 +260,8 @@ def test_equation_equality(e1: Equation, e2: Equation, result: bool) -> None:
     ],
 )
 def test_equation_get_items(e: Equation, terms: list[Term], result: bool) -> None:
+    """Test if all_terms property returns all terms in equation,
+    regardless of side and order."""
     assert result == (
         sorted(e.all_terms, key=lambda term: term.latex_code)
         == sorted(terms, key=lambda term: term.latex_code)
@@ -283,6 +290,7 @@ def test_equation_get_items(e: Equation, terms: list[Term], result: bool) -> Non
 def test_equation_check_input(
     e: Equation, left_test: list[Term], right_test: list[Term], result: bool
 ) -> None:
+    """Test check_input method of Equation."""
     assert result == e.check_input(left_test, right_test)
 
 
@@ -291,6 +299,7 @@ def test_equation_check_input(
     [GAS_LAW, HYDROSTATIC, HYDROSTATIC_WRONG_SITES, FIRST_LAW, FIRST_LAW_OTHER_ORDER],
 )
 def test_equation_dict_cycle(e: Equation) -> None:
+    """Test if as_dict() and from_dict() cycle to same Equation."""
     assert e == Equation.from_dict(e.as_dict())
 
 
@@ -318,6 +327,7 @@ def test_equation_dict_cycle(e: Equation) -> None:
     ],
 )
 def test_equation_as_dict(e: Equation, e_dict: dict, result: bool) -> None:
+    """Test Equation conversion to dictionary."""
     assert result == (e.as_dict() == e_dict)
 
 
@@ -333,10 +343,11 @@ def test_equation_as_dict(e: Equation, e_dict: dict, result: bool) -> None:
     ],
 )
 def test_equation_from_dict(e_dict: dict, e: Equation, result: bool) -> None:
+    """Test Equation constructor from dictionary."""
     assert result == (Equation.from_dict(e_dict) == e)
 
 
-# Test EquationSets
+# EQUATION SET TESTS
 ONE_EQUATION_SET = EquationSet([GAS_LAW], "one equation set")
 ONE_EQUATION_SET_OTHER_EQUATION_NAME = EquationSet([NEXT_GAS_LAW], "one equation set")
 SAME_ONE_EQUATION_SET = EquationSet([GAS_LAW])  # with default name
@@ -355,8 +366,16 @@ BASIC_EQUATION_SET = EquationSet([GAS_LAW, HYDROSTATIC, FIRST_LAW], "basic equat
     "es1, es2, result",
     [
         (ONE_EQUATION_SET, ONE_EQUATION_SET, True),
-        (ONE_EQUATION_SET, ONE_EQUATION_SET_OTHER_EQUATION_NAME, True),  # name of equation in set should not matter
-        (ONE_EQUATION_SET, SAME_ONE_EQUATION_SET, True),  # other (default) name of set should not matter
+        (
+            ONE_EQUATION_SET,
+            ONE_EQUATION_SET_OTHER_EQUATION_NAME,
+            True,
+        ),  # name of equation in set should not matter
+        (
+            ONE_EQUATION_SET,
+            SAME_ONE_EQUATION_SET,
+            True,
+        ),  # other (default) name of set should not matter
         (OTHER_ONE_EQUATION_SET, FALSE_TWO_EQUATION_SET, True),
         (ONE_EQUATION_SET, OTHER_ONE_EQUATION_SET, False),
         (VERY_BASIC_EQUATION_SET, VERY_BASIC_EQUATION_SET_OTHER_WAY_ROUND, True),
@@ -366,6 +385,7 @@ BASIC_EQUATION_SET = EquationSet([GAS_LAW, HYDROSTATIC, FIRST_LAW], "basic equat
 def test_equation_set_equality(
     es1: EquationSet, es2: EquationSet, result: bool
 ) -> None:
+    """Test equality overload for EquationSet."""
     assert result == (es1 == es2)
 
 
@@ -374,10 +394,15 @@ def test_equation_set_equality(
     [
         (ONE_EQUATION_SET, GAS_LAW, True),
         (ONE_EQUATION_SET, FIRST_LAW, False),
-        (ONE_EQUATION_SET, NEXT_GAS_LAW, True),  # since name of equation should not matter
+        (
+            ONE_EQUATION_SET,
+            NEXT_GAS_LAW,
+            True,
+        ),  # since name of equation should not matter
     ],
 )
 def test_equation_set_contains(es: EquationSet, e: Equation, result: bool) -> None:
+    """Test __contains__ overload for EquationSet."""
     assert result == (e in es)
 
 
@@ -390,6 +415,8 @@ def test_equation_set_contains(es: EquationSet, e: Equation, result: bool) -> No
     ],
 )
 def test_equation_set_add_remove_cycle(es: EquationSet, e: Equation) -> None:
+    """Test if adding and then removing an equation cycles back to
+    original EquationSet."""
     new_es: EquationSet = deepcopy(es)
     new_es.add_equation(e)
     new_es.remove_equation(e)
@@ -405,6 +432,8 @@ def test_equation_set_add_remove_cycle(es: EquationSet, e: Equation) -> None:
     ],
 )
 def test_equation_set_remove_add_cycle(es: EquationSet, e: Equation) -> None:
+    """Test if removing and then adding an equation cycles back to
+    original EquationSet."""
     new_es: EquationSet = deepcopy(es)
     new_es.remove_equation(e)
     new_es.add_equation(e)
@@ -422,6 +451,7 @@ def test_equation_set_remove_add_cycle(es: EquationSet, e: Equation) -> None:
 def test_equation_set_remove(
     es: EquationSet, e_to_remove: Equation, es_new: EquationSet
 ) -> None:
+    """Test removing an equation from an EquationSet."""
     es_removed: EquationSet = deepcopy(es)
     es_removed.remove_equation(e_to_remove)
     assert es_removed == es_new
@@ -438,6 +468,7 @@ def test_equation_set_remove(
 def test_equation_set_add(
     es: EquationSet, e_to_add: Equation, es_new: EquationSet
 ) -> None:
+    """Test adding an equation to an EquationSet."""
     es_added: EquationSet = deepcopy(es)
     es_added.add_equation(e_to_add)
     assert es_added == es_new
@@ -450,6 +481,7 @@ def equation_set(request) -> EquationSet:
 
 
 def test_equation_set_json_cycle(equation_set: EquationSet, tmp_path: Path) -> None:
+    """Test if exporting to JSON and then importing cycles back to same EquationSet."""
     # tmp_path is a pytest built-in fixture providing a temp directory for file tests
     # export
     out_path = tmp_path / f"{equation_set.name.replace(' ', '_')}.json"
@@ -460,6 +492,8 @@ def test_equation_set_json_cycle(equation_set: EquationSet, tmp_path: Path) -> N
 
 
 def test_equation_set_to_json(equation_set: EquationSet, tmp_path: Path) -> None:
+    """Test if exporting to JSON yields expected dictionary structure."""
+    # tmp_path is a pytest built-in fixture providing a temp directory for file tests
     out_path = tmp_path / "eq.json"
     equation_set.to_json(out_path)
     test_data = json.loads(out_path.read_text())
@@ -473,6 +507,8 @@ def test_equation_set_to_json(equation_set: EquationSet, tmp_path: Path) -> None
 
 
 def test_equation_set_from_json_manual(tmp_path):
+    """Test if importing from JSON with known structure yields expected EquationSet."""
+    # tmp_path is a pytest built-in fixture providing a temp directory for file tests
     file = tmp_path / "eq.json"
     test_eq1_dict: dict[str, str | list[dict[str, str]]] = {
         "name": "eq1",
