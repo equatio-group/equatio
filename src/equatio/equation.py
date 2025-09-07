@@ -1,5 +1,6 @@
 from __future__ import annotations
 import hashlib
+import itertools
 import json
 from pathlib import Path
 from typing import Any
@@ -26,17 +27,16 @@ class EquationSet:
         self.equations = sorted(unique_equations, key=lambda equ: equ.name)
 
     def __str__(self) -> str:
-        eq_names = ", ".join(equ.name for equ in self.equations)
+        eq_strings = "\n".join(f" - {equ}" for equ in self.equations)
         return (
-            f'EquationSet("{self.name}", containing {len(self.equations)} '
-            f"equations: {eq_names})"
+            f"Equation set \"{self.name}\" with {len(self.equations)} equations:\n"
+            f"{eq_strings}"
         )
 
     def __eq__(self, other: Any) -> bool:
         # Currently only works if other has the right equation names
         if not isinstance(other, EquationSet):
             return False
-
         return self.equations == other.equations
 
     def add_equation(self, new_equation: Equation) -> None:
@@ -52,7 +52,7 @@ class EquationSet:
     def to_json(self, json_path: Path | None = None) -> None:
         json_path = (
             json_path or JSON_DIR / f"{self.name.replace(' ', '_')}.json"
-        )  # syntactic sugar
+        )
         with json_path.open("w") as f:
             json.dump(
                 [equation.as_dict() for equation in self.equations], f, indent=4
@@ -61,7 +61,7 @@ class EquationSet:
     @classmethod
     def from_json(
         cls, file_path: Path, name: str | None = None
-    ) -> EquationSet:  # typical use case for a class method
+    ) -> EquationSet:
         name = name or file_path.stem.replace("_", " ")
         with file_path.open("r") as f:
             equations = [Equation.from_dict(elem) for elem in json.load(f)]
@@ -85,7 +85,7 @@ class Equation:
     def __str__(self) -> str:
         left_terms = " ".join(str(t) for t in self.left)
         right_terms = " ".join(str(t) for t in self.right)
-        return f'Equation("{self.name}": {left_terms} = {right_terms})'
+        return f"\"{self.name}\": {left_terms} = {right_terms}"
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, Equation):
@@ -141,9 +141,8 @@ class Term:
         self.sign = sign
         self.latex_code = latex_code
         # ensure unique sprite_id based on sign and latex_code if not provided
-        full_latex_code = "".join([self.sign, self.latex_code])  # no f-string bc of {}
+        full_latex_code = f"{self.sign}{self.latex_code}"
         self.sprite_id = sprite_id or hashlib.sha1(full_latex_code.encode()).hexdigest()
-        # check if sprite exists
         if not self.get_sprite_path().exists():
             # create sprite
             fig, ax = plt.subplots(figsize=(1, 1), dpi=100)
@@ -151,7 +150,7 @@ class Term:
                 ax.text(
                     0.5,
                     0.5,
-                    "".join(["$", full_latex_code, "$"]),
+                    f"${full_latex_code}$",
                     fontsize=20,
                     ha="center",
                     va="center",
@@ -168,7 +167,7 @@ class Term:
             plt.close(fig)
 
     def __str__(self) -> str:
-        return f'Term("{self.name}": {self.sign} {self.latex_code})'
+        return f"{self.sign} {self.latex_code}"
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, Term):
