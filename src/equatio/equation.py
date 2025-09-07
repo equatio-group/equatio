@@ -100,14 +100,10 @@ class Equation:
 
     def __init__(self, name: str, left: list[Term], right: list[Term]) -> None:
         """Initialise with name, left side terms, and right side terms. Empty sides default to a zero term. Sort terms for each side by latex_code."""
-        zero_term = Term("0", "0", "+")
+        ZEREO_TERM = Term("0", "0", "+")
         self.name = name
-        if not left:
-            left = [zero_term]
-        if not right:
-            right = [zero_term]
-        self.left = sorted(left, key=lambda t: t.latex_code)
-        self.right = sorted(right, key=lambda t: t.latex_code)
+        self.left = sorted(left or [ZEREO_TERM], key=lambda t: t.latex_code)
+        self.right = sorted(right or [ZEREO_TERM], key=lambda t: t.latex_code)
 
     def __str__(self) -> str:
         """String representation of the equation."""
