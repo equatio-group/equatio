@@ -109,7 +109,7 @@ def test_term_sprite_path_for_same_latex(t1, t2, result) -> None:
 
 @pytest.mark.parametrize("t", [T_P1, T_P2, T_P3, T_P4])
 def test_term_dict_cycle(t: Term) -> None:
-    """Test if as_dicht() and from_dict() cycle to same Term."""
+    """Test if as_dict() and from_dict() cycle to same Term."""
     assert t == Term.from_dict(t.as_dict())
 
 
@@ -353,7 +353,7 @@ ONE_EQUATION_SET_OTHER_EQUATION_NAME = EquationSet([NEXT_GAS_LAW], "one equation
 SAME_ONE_EQUATION_SET = EquationSet([GAS_LAW])  # with default name
 OTHER_ONE_EQUATION_SET = EquationSet([FIRST_LAW], "other one equation set")
 FALSE_TWO_EQUATION_SET = EquationSet(
-    [FIRST_LAW, FIRST_LAW_OTHER_ORDER], "one wquation set"
+    [FIRST_LAW, FIRST_LAW_OTHER_ORDER], "one equation set"
 )  # should only yield one equation in set
 VERY_BASIC_EQUATION_SET = EquationSet([GAS_LAW, HYDROSTATIC], "basic equations")
 VERY_BASIC_EQUATION_SET_OTHER_WAY_ROUND = EquationSet(
