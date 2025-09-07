@@ -49,6 +49,11 @@ class EquationSet:
         else:
             raise ValueError("Equation not found in the set.")
 
+    @property
+    def all_terms(self) -> list[Term]:
+        """All terms of all equations in the set, usage without brackets like `equation_set_object.all_terms`."""
+        return list(itertools.chain.from_iterable(equation.all_terms for equation in self.equations))
+
     def to_json(self, json_path: Path | None = None) -> None:
         json_path = (
             json_path or JSON_DIR / f"{self.name.replace(' ', '_')}.json"
@@ -95,7 +100,7 @@ class Equation:
     @property
     def all_terms(self) -> list[Term]:
         """All terms of equation, usage without brackets like `equation_object.all_terms`."""
-        return self.left + self.right
+        return [*self.left, *self.right]
 
     def check_input(self, test_left: list[Term], test_right: list[Term]) -> bool:
         return self._check_side(self.left, test_left) and self._check_side(
