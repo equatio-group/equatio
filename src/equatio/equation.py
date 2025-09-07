@@ -34,10 +34,14 @@ class EquationSet:
         )
 
     def __eq__(self, other: Any) -> bool:
-        # Currently only works if other has the right equation names
         if not isinstance(other, EquationSet):
             return False
         return self.equations == other.equations
+
+    def __contains__(self, equation: Any) -> bool:
+        if not isinstance(equation, Equation):
+            return False
+        return equation in self.equations
 
     def add_equation(self, new_equation: Equation) -> None:
         self.equations.append(new_equation)
@@ -178,6 +182,7 @@ class Term:
         if not isinstance(other, Term):
             return False
         # Currently, .name does not need to be the same
+        # sprite_id will be the same if sign and latex_code are the same
         return self.sign == other.sign and self.latex_code == other.latex_code
 
     def get_sprite_path(self) -> Path:
@@ -202,7 +207,7 @@ class Term:
         )
 
 
-# TODO: remove in final solution
+# TODO: remove in final solution (and also remove corresponding and not needed JSONs)
 if __name__ == "__main__":
     # Create terms for examples
     # (would only be needed in version with equation editor or type-in solution)
@@ -230,8 +235,8 @@ if __name__ == "__main__":
     print(f"{EQUATION_SET_FROM_EQUATIONS == EQUATION_SET_FROM_JSON=}\n")
 
     # check if equation is in set (could be used to check if user_equation in board_set)
-    print(f"{EQUATION_1 in EQUATION_SET_FROM_JSON.equations=}")
-    print(f"{EQUATION_2 in EQUATION_SET_FROM_EQUATIONS.equations=}\n")
+    print(f"{EQUATION_1 in EQUATION_SET_FROM_JSON=}")
+    print(f"{EQUATION_2 in EQUATION_SET_FROM_EQUATIONS=}\n")
 
     # How to get sprites for terms of equation set (to display them on the board)
     print("All sprite paths per term in EQUATION_SET_FROM_EQUATIONS:")
