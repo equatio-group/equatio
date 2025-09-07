@@ -230,7 +230,7 @@ FIRST_LAW_DICT = {
 @pytest.mark.parametrize(
     "e1, e2, result",
     [
-        (GAS_LAW, NEXT_GAS_LAW, True),
+        (GAS_LAW, NEXT_GAS_LAW, True),  # name does not matter (as of now)
         (HYDROSTATIC, HYDROSTATIC_WRONG_SITES, False),  # wrong sides
         (
             FIRST_LAW,
@@ -337,11 +337,12 @@ def test_equation_from_dict(e_dict: dict, e: Equation, result: bool) -> None:
 
 
 # Test EquationSets
-ONE_EQUATION_SET = EquationSet([GAS_LAW], "one term set")
+ONE_EQUATION_SET = EquationSet([GAS_LAW], "one equation set")
+ONE_EQUATION_SET_OTHER_EQUATION_NAME = EquationSet([NEXT_GAS_LAW], "one equation set")
 SAME_ONE_EQUATION_SET = EquationSet([GAS_LAW])  # with default name
-OTHER_ONE_EQUATION_SET = EquationSet([FIRST_LAW], "other one term set")
+OTHER_ONE_EQUATION_SET = EquationSet([FIRST_LAW], "other one equation set")
 FALSE_TWO_EQUATION_SET = EquationSet(
-    [FIRST_LAW, FIRST_LAW_OTHER_ORDER], "one term set"
+    [FIRST_LAW, FIRST_LAW_OTHER_ORDER], "one wquation set"
 )  # should only yield one equation in set
 VERY_BASIC_EQUATION_SET = EquationSet([GAS_LAW, HYDROSTATIC], "basic equations")
 VERY_BASIC_EQUATION_SET_OTHER_WAY_ROUND = EquationSet(
@@ -354,7 +355,8 @@ BASIC_EQUATION_SET = EquationSet([GAS_LAW, HYDROSTATIC, FIRST_LAW], "basic equat
     "es1, es2, result",
     [
         (ONE_EQUATION_SET, ONE_EQUATION_SET, True),
-        (ONE_EQUATION_SET, SAME_ONE_EQUATION_SET, True),
+        (ONE_EQUATION_SET, ONE_EQUATION_SET_OTHER_EQUATION_NAME, True),  # name of equation in set should not matter
+        (ONE_EQUATION_SET, SAME_ONE_EQUATION_SET, True),  # other (default) name of set should not matter
         (OTHER_ONE_EQUATION_SET, FALSE_TWO_EQUATION_SET, True),
         (ONE_EQUATION_SET, OTHER_ONE_EQUATION_SET, False),
         (VERY_BASIC_EQUATION_SET, VERY_BASIC_EQUATION_SET_OTHER_WAY_ROUND, True),
@@ -365,6 +367,18 @@ def test_equation_set_equality(
     es1: EquationSet, es2: EquationSet, result: bool
 ) -> None:
     assert result == (es1 == es2)
+
+
+@pytest.mark.parametrize(
+    "es, e, result",
+    [
+        (ONE_EQUATION_SET, GAS_LAW, True),
+        (ONE_EQUATION_SET, FIRST_LAW, False),
+        (ONE_EQUATION_SET, NEXT_GAS_LAW, True),  # since name of equation should not matter
+    ],
+)
+def test_equation_set_contains(es: EquationSet, e: Equation, result: bool) -> None:
+    assert result == (e in es)
 
 
 @pytest.mark.parametrize(
@@ -439,7 +453,7 @@ def test_equation_set_json_cycle(equation_set: EquationSet, tmp_path: Path) -> N
     # tmp_path is a pytest built-in fixture providing a temp directory for file tests
     # export
     out_path = tmp_path / f"{equation_set.name.replace(' ', '_')}.json"
-    equation_set.to_json(out_path)
+    equation_set.to_json(out_path)  # uses equation_set from fixture above
     # import
     es_in = EquationSet.from_json(out_path)
     assert equation_set == es_in
