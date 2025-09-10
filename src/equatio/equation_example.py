@@ -1,5 +1,6 @@
-from equation import Equation, EquationSet
+from equation import Equation
 from term import Term
+from equation_set import EquationSet
 from pathlib import Path
 
 _DATA_DIR = Path(__file__).parents[2]
