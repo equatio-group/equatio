@@ -1,6 +1,6 @@
 from __future__ import annotations
-from term import Term
-from equation import Equation
+from src.equatio.term import Term
+from src.equatio.equation import Equation
 from pathlib import Path
 from typing import Any
 import itertools
