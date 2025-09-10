@@ -86,9 +86,3 @@ class Term:
             sign=data["sign"] if "sign" in data else "+",
             sprite_id=data.get("sprite_id") if "sprite_id" in data else None,
         )
-
-#Testing
-Testingterm = Term("Adiabatic temperature gradient","\\frac{g}{c_p}","-")
-
-Testingterm.get_sprite_path()
-Testingterm.as_dict()
