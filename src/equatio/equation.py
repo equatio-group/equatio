@@ -43,16 +43,16 @@ class Equation:
 
     def add_right(self, new_right: Term) -> None:
         """ Add a new term to the right side of the equation."""
-        if not isinstance(new_right, Term):
-            raise ValueError("Only Term objects can be added.")
+        #if not isinstance(new_right, Term):
+        #    raise ValueError("Only Term objects can be added.")
         if new_right not in self.right:
             self.right.append(new_right)
             self.right=sorted(self.right, key=lambda t: t.latex_code)
 
     def add_left(self, new_left: Term) -> None:
         """Add a new term to the left side of the equation."""
-        if not isinstance(new_left, Term):
-            raise ValueError("Only Term objects can be added.")
+        #if not isinstance(new_left, Term):
+        #    raise ValueError("Only Term objects can be added.")
         if new_left not in self.left:
             self.left.append(new_left)
             self.left=sorted(self.left, key=lambda t: t.latex_code)

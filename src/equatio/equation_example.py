@@ -56,3 +56,13 @@ if __name__ == "__main__":
     )
     # ...it should be the same as before
     print(f"{EQUATION_SET_FROM_EQUATIONS == equation_set1_reload=}")
+
+    #Testing add and remove methods
+    NEWTERM1 = Term("\\tau_w","\\frac{\\tau_w}{\\rho}","+")
+    NEWTERM2 = Term("U_*^2","U_*^2","+")
+    print(EQUATION_1.__str__())
+    print(isinstance(NEWTERM1, Term))
+
+    #EQUATION_1.add_left(Term("a^2","a^2","+"))
+    #EQUATION_1.add_right(Term("b^2+c^2","b^2+c^2","+"))
+    #print(EQUATION_1.__str__())
