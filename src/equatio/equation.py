@@ -50,12 +50,30 @@ class Equation:
             self.right=sorted(self.right, key=lambda t: t.latex_code)
 
     def add_left(self, new_left: Term) -> None:
-        '''Add a new term to the left side of the equation.'''
+        """Add a new term to the left side of the equation."""
         if not isinstance(new_left, Term):
             raise ValueError("Only Term objects can be added.")
         if new_left not in self.left:
             self.left.append(new_left)
             self.left=sorted(self.left, key=lambda t: t.latex_code)
+
+    def remove_right(self,removed_right: Term) -> None:
+        """Remove a term from the right side of the equation."""
+        if not isinstance(removed_right, Term):
+            raise ValueError("Object to remove must be a Term")
+        if removed_right not in self.right:
+            raise ValueError("This term is not in the equation")
+        if removed_right in self.right:
+            self.right.remove(removed_right)
+
+    def remove_left(self,removed_left: Term) -> None:
+        """Remove a term from the left side of the equation."""
+        if not isinstance(removed_left, Term):
+            raise ValueError("Object to remove must be a Term")
+        if removed_left not in self.left:
+            raise ValueError("This term is not in the equation")
+        if removed_left in self.left:
+            self.left.remove(removed_left)
 
     @property
     def all_terms(self) -> list[Term]:
