@@ -59,8 +59,8 @@ class Equation:
 
     def remove_right(self,removed_right: Term) -> None:
         """Remove a term from the right side of the equation."""
-        if not isinstance(removed_right, Term):
-            raise ValueError("Object to remove must be a Term")
+        #if not isinstance(removed_right, Term):
+        #    raise ValueError("Object to remove must be a Term")
         if removed_right not in self.right:
             raise ValueError("This term is not in the equation")
         if removed_right in self.right:
@@ -68,8 +68,8 @@ class Equation:
 
     def remove_left(self,removed_left: Term) -> None:
         """Remove a term from the left side of the equation."""
-        if not isinstance(removed_left, Term):
-            raise ValueError("Object to remove must be a Term")
+        #if not isinstance(removed_left, Term):
+        #    raise ValueError("Object to remove must be a Term")
         if removed_left not in self.left:
             raise ValueError("This term is not in the equation")
         if removed_left in self.left:
