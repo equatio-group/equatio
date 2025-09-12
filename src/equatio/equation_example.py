@@ -74,3 +74,9 @@ if __name__ == "__main__":
     #EQUATION_1.remove_left(NEWTERM2)
     EQUATION_1.remove_right(NEWTERM2)
     print(EQUATION_1)
+
+    #additional test of zero term
+    EQUATION_1.remove_left(TERM_1)
+    print(EQUATION_1)
+    EQUATION_1.remove_right(TERM_2)
+    print(EQUATION_1)

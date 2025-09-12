@@ -17,13 +17,15 @@ SPRITE_DIR = _DATA_DIR / "sprites"
 # Default name constant
 _DEFAULT_SET_NAME = "MyEquations"
 
+#Default empty equation
+ZERO_TERM = Term("0", "0", "+")
+
 class Equation:
     """An equation with terms divided into left and right part."""
 
     def __init__(self, name: str, left: list[Term], right: list[Term]) -> None:
         """Initialise with name, left side terms, and right side terms.
         Empty sides default to a zero term. Sort terms for each side by latex_code."""
-        ZERO_TERM = Term("0", "0", "+")
         self.name = name
         self.left = sorted(left or [ZERO_TERM], key=lambda t: t.latex_code)
         self.right = sorted(right or [ZERO_TERM], key=lambda t: t.latex_code)
@@ -65,6 +67,7 @@ class Equation:
             raise ValueError("This term is not in the equation")
         if removed_right in self.right:
             self.right.remove(removed_right)
+        self.right = self.right or [ZERO_TERM]
 
     def remove_left(self,removed_left: Term) -> None:
         """Remove a term from the left side of the equation."""
@@ -74,6 +77,7 @@ class Equation:
             raise ValueError("This term is not in the equation")
         if removed_left in self.left:
             self.left.remove(removed_left)
+        self.left = self.left or [ZERO_TERM]
 
     @property
     def all_terms(self) -> list[Term]:
