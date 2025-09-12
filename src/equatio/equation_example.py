@@ -1,7 +1,10 @@
-from equation import Equation
-from term import Term
-from equation_set import EquationSet
 from pathlib import Path
+
+from src.equatio.equation import Equation
+from src.equatio.equation_set import EquationSet
+from src.equatio.term import Term
+
+
 
 _DATA_DIR = Path(__file__).parents[2]
 JSON_DIR = _DATA_DIR / "data"
@@ -60,13 +63,14 @@ if __name__ == "__main__":
     #Testing add and remove methods
     NEWTERM1 = Term("\\tau_w","\\frac{\\tau_w}{\\rho}","+")
     NEWTERM2 = Term("U_*^2","U_*^2","+")
-    print(EQUATION_1.__str__())
+    print(EQUATION_1)
     print(isinstance(NEWTERM1, Term))
+    print(not isinstance(NEWTERM1, Term))
     EQUATION_1.add_left(NEWTERM1)
     EQUATION_1.add_right(NEWTERM2)
-    print(EQUATION_1.__str__())
+    print(EQUATION_1)
 
     EQUATION_1.remove_left(NEWTERM1)
     #EQUATION_1.remove_left(NEWTERM2)
     EQUATION_1.remove_right(NEWTERM2)
-    print(EQUATION_1.__str__())
+    print(EQUATION_1)

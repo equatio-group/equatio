@@ -1,10 +1,11 @@
 from __future__ import annotations
-from src.equatio.term import Term
-from src.equatio.equation import Equation
-from pathlib import Path
-from typing import Any
 import itertools
 import json
+from pathlib import Path
+from typing import Any
+
+from src.equatio.equation import Equation
+from src.equatio.term import Term
 
 
 _DATA_DIR = Path(__file__).parents[2]
