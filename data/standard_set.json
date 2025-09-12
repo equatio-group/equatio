@@ -1,46 +1,117 @@
 [
     {
-        "name": "ExampleEquation1",
+        "name": "Ideal gas law",
         "left": [
             {
-                "name": "x^2",
+                "name": "pressure",
                 "sign": "+",
-                "latex_code": "x^2",
-                "sprite_id": "a875a749d96857772a00183d2d3df8a2d2046b06"
+                "latex_code": "p"
             }
         ],
         "right": [
             {
-                "name": "yp/pi",
-                "sign": "-",
-                "latex_code": "\\frac{yp}{\\pi}",
-                "sprite_id": "efc6e98fec9f308c81ee240700b8cbaa7241fbff"
+                "name": "rho*R*T",
+                "sign": "+",
+                "latex_code": "\\rho R T"
             }
         ]
     },
     {
-        "name": "ExampleEquation2",
+        "name": "Bernoulli equation",
         "left": [
             {
-                "name": "yp/pi",
-                "sign": "-",
-                "latex_code": "\\frac{yp}{\\pi}",
-                "sprite_id": "efc6e98fec9f308c81ee240700b8cbaa7241fbff"
+                "name": "static pressure",
+                "sign": "+",
+                "latex_code": "p"
             },
             {
-                "name": "x^2",
+                "name": "dynamic pressure",
                 "sign": "+",
-                "latex_code": "x^2",
-                "sprite_id": "a875a749d96857772a00183d2d3df8a2d2046b06"
+                "latex_code": "\\frac{\\rho}{2} v^2"
+            },
+            {
+                "name": "rho*g*z",
+                "sign": "+",
+                "latex_code": "\\rho g z"
             }
         ],
         "right": [
             {
-                "name": "dp/dz",
+                "name": "constant",
                 "sign": "+",
-                "latex_code": "\\frac{\\operatorname{d} p}{\\operatorname{d} z}",
-                "sprite_id": "1a79d43ddf73da679b2329a42ec13b69d4bb9277"
+                "latex_code": "\\text{const.}"
             }
+        ]
+    },
+    {
+        "name": "Gibbs energy for homogenic nucleation",
+        "left":[
+            {
+                "name": "Gibbs energy",
+                "sign": "+",
+                "latex_code": "\\Delta G"
+            }
+        ],
+        "right":[
+          {
+                "name": "Surface tension term",
+                "sign": "+",
+                "latex_code": "4 \\pi R^2 \\sigma"
+          },
+          {
+                "name": "Saturation term",
+                "sign": "-",
+                "latex_code": "\\frac{4 \\pi R^3}{3 v_w} R^* T ln\\left(\\frac{e}{e_s(T)}\\right)"
+          }
+        ]
+    },
+    {
+        "name": "adiabatic temperature gradient",
+        "left":[
+            {
+                "name": "\\operatorname{d}T/\\operatorname{d}z",
+                "sign": "+",
+                "latex_code": "\\frac{dT}{dz}"
+            }
+        ],
+        "right":[
+            {
+                "name": "g/cp",
+                "sign": "-",
+                "latex_code": "\\frac{g}{c_p}"
+            }
+        ]
+    },
+    {
+        "name": "Kinetic energy equation of the mean flow in turbulent systems",
+        "left":[
+            {
+                "name": "local change",
+                "sign": "+",
+                "latex_code": "\\frac{\\partial}{\\partial t} \\left(\\frac{1}{2} U_i U_i \\right)"
+            },
+            {
+                "name": "advective change",
+                "sign": "+",
+                "latex_code": "U_j \\frac{\\partial}{\\partial x_j} \\left(\\frac{1}{2} U_i U_i \\right)"
+            }
+        ],
+        "right":[
+          {
+                "name": "transport through molecular stress",
+                "sign": "+",
+                "latex_code": "\\frac{1}{\\rho} \\frac{\\partial}{\\partial x_j} (T_{ij} U_i)"
+          },
+          {
+                "name": "transport through shear stress",
+                "sign": "-",
+                "latex_code": "2 \\my S_{ij} S_{ij}"
+          },
+          {
+                "name": "transport through turbulent deformation work",
+                "sign": "+",
+                "latex_code": "\\bar{u_i u_j} S_{ij}"
+          }
         ]
     }
 ]
