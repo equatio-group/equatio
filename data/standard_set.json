@@ -105,12 +105,12 @@
           {
                 "name": "transport through shear stress",
                 "sign": "-",
-                "latex_code": "2 \\my S_{ij} S_{ij}"
+                "latex_code": "2 \\nu S_{ij} S_{ij}"
           },
           {
                 "name": "transport through turbulent deformation work",
                 "sign": "+",
-                "latex_code": "\\bar{u_i u_j} S_{ij}"
+                "latex_code": "\\overline{u_i u_j} S_{ij}"
           }
         ]
     }
