@@ -5,7 +5,8 @@ from itertools import product
 
 import numpy as np
 import pygame
-from equation import Term  # <-- use Term objects for sprites
+
+from equation import Term, EquationSet, JSON_DIR  # add EquationSet import
 
 # === Constants ===
 
@@ -204,26 +205,34 @@ def main() -> None:
 
     clock = pygame.time.Clock()
     running = True
+    
+    feedback_message = ""
+    feedback_timer = 0
+    font = pygame.font.Font(FONT_NAME, 32)
 
     # containers
     grid = [[None for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
     slots = [None for _ in range(2 * SLOTS_PER_SIDE)]
 
     cell_rects = build_grid(width, height)
-    
     slot_rects, check_button_rect = build_equation_bar(width, height, screen)
 
-    # example terms
-    term1 = Term("x^2", "x^2", "+")
-    term2 = Term("y/pi", r"\frac{y}{\pi}", "-")
+# === Load equation set and extract terms from JSON ===
+    # change file name to the one you actually want to load
+    equation_set = EquationSet.from_json(JSON_DIR / "standard_set.json")
+    all_terms = equation_set.all_terms
 
-    dt1 = DraggableTerm(term1, (0, 0), cell_rects[(0, 0)], "grid")
-    dt2 = DraggableTerm(term2, (0, 1), cell_rects[(0, 1)], "grid")
-    grid[0][0] = dt1
-    grid[0][1] = dt2
+    # Randomly distribute terms into grid cells
+    available_positions = list(cell_rects.keys())
+    random.shuffle(available_positions)
 
-    draggable_terms = [dt1, dt2]
-
+    draggable_terms = []
+    for term, pos in zip(all_terms, available_positions):
+        rect = cell_rects[pos]
+        dt = DraggableTerm(term, pos, rect, "grid")
+        grid[pos[0]][pos[1]] = dt
+        draggable_terms.append(dt)
+    # Note: If there are more terms than cells, some terms will not be placed.
     while running:
         clock.tick(FPS)
         for event in pygame.event.get():
@@ -246,7 +255,61 @@ def main() -> None:
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if check_button_rect.collidepoint(event.pos):
-                    print("Check pressed (placeholder)")
+                    # --- Collect terms from slots ---
+                    left_terms = [slots[i].term for i in range(SLOTS_PER_SIDE) if slots[i]]
+                    right_terms = [slots[i].term for i in range(SLOTS_PER_SIDE, 2 * SLOTS_PER_SIDE) if slots[i]]
+
+                    # --- Check against equations in set ---
+                    correct = False
+                    
+                    left_codes = sorted([t.latex_code for t in left_terms])
+                    right_codes = sorted([t.latex_code for t in right_terms])
+
+                    for eq in equation_set.equations:
+                        if ((left_codes == [t.latex_code for t in eq.left] and
+                            right_codes == [t.latex_code for t in eq.right]) or
+                            (left_codes == [t.latex_code for t in eq.right] and
+                            right_codes == [t.latex_code for t in eq.left])):
+                            correct = True
+                            break
+
+                    # --- after checking for correct equation ---
+                    if correct:
+                        feedback_message = "Correct!"
+                        # Remove terms used in the equation
+                        used_terms = [dt for dt in slots if dt]
+                        for dt in used_terms:
+                            if dt in draggable_terms:
+                                draggable_terms.remove(dt)
+                        slots = [None for _ in range(len(slots))]
+
+                        # If no draggable terms left -> show final message
+                        if not draggable_terms:
+                            feedback_message = "Great, you know it all!"
+                    else:
+                        feedback_message = "Incorrect!"
+                        # Return terms to their original positions
+                        for i, dt in enumerate(slots):
+                            if dt:
+                                if dt.origin_container == "grid":
+                                    # return to original grid cell
+                                    r, c = dt.origin_key
+                                    dt.pos_key = (r, c)
+                                    dt.rect.center = dt.origin_rect.center
+                                    dt.container = "grid"
+                                    grid[r][c] = dt
+                                else:
+                                    # fallback: place back into first free grid cell
+                                    for (r, c), rect in cell_rects.items():
+                                        if grid[r][c] is None:
+                                            dt.pos_key = (r, c)
+                                            dt.rect.center = rect.center
+                                            dt.container = "grid"
+                                            grid[r][c] = dt
+                                            break
+                                slots[i] = None
+
+                    feedback_timer = pygame.time.get_ticks()
 
             for dt in draggable_terms:
                 dt.handle_event(event, grid, slots, cell_rects, slot_rects)
@@ -270,6 +333,13 @@ def main() -> None:
 
         for dt in draggable_terms:
             dt.draw(screen)
+            
+        # Draw feedback message for 2 seconds
+        if feedback_message and pygame.time.get_ticks() - feedback_timer < 2000:
+            color = (0, 200, 0) if correct else (200, 0, 0)
+            msg_surf = font.render(feedback_message, True, color)
+            screen.blit(msg_surf, (width // 2 - msg_surf.get_width() // 2,
+                                   height - EQUATION_BAR_HEIGHT - 40))
 
         pygame.display.flip()
 
@@ -278,5 +348,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-
