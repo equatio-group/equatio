@@ -272,7 +272,6 @@ def main() -> None:
                             right_codes == [t.latex_code for t in eq.left])):
                             correct = True
                             break
-
                     # --- after checking for correct equation ---
                     if correct:
                         feedback_message = "Correct!"
@@ -318,10 +317,12 @@ def main() -> None:
         draw_background(screen, width, height)
 
         # draw grid
-        for rect in cell_rects.values():
-            pygame.draw.rect(screen, WHITE, rect, border_radius=4)
+        for (r, c), rect in cell_rects.items():
+            if grid[r][c] is None:
+                continue
+            else:
+                pygame.draw.rect(screen, WHITE, rect, border_radius=4)
             pygame.draw.rect(screen, GREY, rect, 1)
-
         # equation bar (rebuild each frame)
         slot_rects, check_button_rect = build_equation_bar(width, height, screen)
 
