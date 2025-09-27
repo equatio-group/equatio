@@ -6,7 +6,9 @@ from itertools import product
 import numpy as np
 import pygame
 
-from equation import Term, EquationSet, JSON_DIR  # add EquationSet import
+from equation import  JSON_DIR # add EquationSet import
+from term import Term, JSON_DIR
+from equation_set import EquationSet, JSON_DIR
 
 # === Constants ===
 
