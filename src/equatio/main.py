@@ -11,10 +11,10 @@ from term import Term, JSON_DIR
 from equation_set import EquationSet, JSON_DIR
 
 # === Constants ===
-
 CELL_COUNT = 16
 GRID_SIZE = int(np.sqrt(CELL_COUNT))
-
+height =1800
+width =1200
 # Colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -32,14 +32,14 @@ CELL_PADDING = 10
 
 # Equation Bar Constants
 EQUATION_BAR_HEIGHT = 100
-SLOT_WIDTH = 80
-SLOT_HEIGHT = 80
 SLOT_MARGIN = 10
 SLOTS_PER_SIDE = 4
 EQUAL_SIGN_FONT_SIZE = 40
 BUTTON_FONT_SIZE = 30
-CHECK_BUTTON_WIDTH = 120
-CHECK_BUTTON_HEIGHT = 50
+SLOT_WIDTH = height / 10
+SLOT_HEIGHT = width / 15
+CHECK_BUTTON_WIDTH = width / 10
+CHECK_BUTTON_HEIGHT = height / 36
 
 
 def draw_background(screen, width, height) -> None:
@@ -201,7 +201,7 @@ def main() -> None:
     pygame.init()
     pygame.font.init()
 
-    width, height = 800, 800
+    width, height = 1800, 1200
     screen = pygame.display.set_mode((width, height), pygame.RESIZABLE)
     pygame.display.set_caption("Equatio")
 
