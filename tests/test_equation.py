@@ -1,13 +1,14 @@
 # Unit tests for Term, Equation, and EquationSet classes in src.equatio.equation
 
-
 from copy import deepcopy
 import hashlib
 import json
 from pathlib import Path
 import pytest
 
-from src.equatio.equation import Term, Equation, EquationSet
+from src.equatio.term import Term
+from src.equatio.equation import Equation
+from src.equatio.equation_set import EquationSet
 
 
 # Helper function
