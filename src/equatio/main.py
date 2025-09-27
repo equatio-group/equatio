@@ -6,13 +6,15 @@ from itertools import product
 import numpy as np
 import pygame
 
-from equation import Term, EquationSet, JSON_DIR  # add EquationSet import
+from equation import  JSON_DIR # add EquationSet import
+from term import Term, JSON_DIR
+from equation_set import EquationSet, JSON_DIR
 
 # === Constants ===
-
 CELL_COUNT = 16
 GRID_SIZE = int(np.sqrt(CELL_COUNT))
-
+height =1800
+width =1200
 # Colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -30,14 +32,14 @@ CELL_PADDING = 10
 
 # Equation Bar Constants
 EQUATION_BAR_HEIGHT = 100
-SLOT_WIDTH = 80
-SLOT_HEIGHT = 80
 SLOT_MARGIN = 10
 SLOTS_PER_SIDE = 4
 EQUAL_SIGN_FONT_SIZE = 40
 BUTTON_FONT_SIZE = 30
-CHECK_BUTTON_WIDTH = 120
-CHECK_BUTTON_HEIGHT = 50
+SLOT_WIDTH = height / 10
+SLOT_HEIGHT = width / 15
+CHECK_BUTTON_WIDTH = width / 10
+CHECK_BUTTON_HEIGHT = height / 36
 
 
 def draw_background(screen, width, height) -> None:
@@ -199,7 +201,7 @@ def main() -> None:
     pygame.init()
     pygame.font.init()
 
-    width, height = 800, 800
+    width, height = 1800, 1200
     screen = pygame.display.set_mode((width, height), pygame.RESIZABLE)
     pygame.display.set_caption("Equatio")
 
@@ -272,7 +274,6 @@ def main() -> None:
                             right_codes == [t.latex_code for t in eq.left])):
                             correct = True
                             break
-
                     # --- after checking for correct equation ---
                     if correct:
                         feedback_message = "Correct!"
@@ -318,10 +319,12 @@ def main() -> None:
         draw_background(screen, width, height)
 
         # draw grid
-        for rect in cell_rects.values():
-            pygame.draw.rect(screen, WHITE, rect, border_radius=4)
+        for (r, c), rect in cell_rects.items():
+            if grid[r][c] is None:
+                continue
+            else:
+                pygame.draw.rect(screen, WHITE, rect, border_radius=4)
             pygame.draw.rect(screen, GREY, rect, 1)
-
         # equation bar (rebuild each frame)
         slot_rects, check_button_rect = build_equation_bar(width, height, screen)
 
