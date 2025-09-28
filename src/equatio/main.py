@@ -98,7 +98,7 @@ def build_equation_bar(width, height, screen):
     SLOT_HEIGHT = height/13
     EQUAL_SIGN_FONT_SIZE = int(width/45)
     SLOT_MARGIN = width/180
-    BUTTON_FONT_SIZE = int(width/45/60)
+    BUTTON_FONT_SIZE = int(width/60)
     CHECK_BUTTON_WIDTH = width/15
     CHECK_BUTTON_HEIGHT = height/22
     BUTTON_FONT_SIZE = int(width/60)
@@ -150,10 +150,16 @@ def build_equation_bar(width, height, screen):
 class DraggableTerm:
     """Class representing a draggable term bound to a grid cell or equation slot."""
 
-    def __init__(self, term: Term, pos_key, rect, container="grid"):
+    def __init__(self, term: Term, pos_key, rect, container="grid", s_width=0,):
         self.term = term
         self.image = pygame.image.load(term.get_sprite_path()).convert_alpha()
+        original_width, original_height = self.image.get_size()
+        desired_width, desired_height = (s_width/12, s_width/30)
+        scale_factor = min(desired_width / original_width, desired_height / original_height)
+        new_size = (int(original_width * scale_factor), int(original_height * scale_factor))
+        self.image = pygame.transform.smoothscale(self.image, new_size)
         self.rect = self.image.get_rect(center=rect.center)
+
 
         # position info
         self.pos_key = pos_key  # (row, col) or slot index
@@ -256,7 +262,7 @@ def main() -> None:
     draggable_terms = []
     for term, pos in zip(all_terms, available_positions):
         rect = cell_rects[pos]
-        dt = DraggableTerm(term, pos, rect, "grid")
+        dt = DraggableTerm(term, pos, rect, "grid",width)
         grid[pos[0]][pos[1]] = dt
         draggable_terms.append(dt)
     # Note: If there are more terms than cells, some terms will not be placed.
