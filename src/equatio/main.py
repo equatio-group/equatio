@@ -6,21 +6,20 @@ from itertools import product
 import numpy as np
 import pygame
 
-from equation import  JSON_DIR # add EquationSet import
-from term import Term, JSON_DIR
+
+from term import Term
 from equation_set import EquationSet, JSON_DIR
 
 # === Constants ===
 CELL_COUNT = 16
 GRID_SIZE = int(np.sqrt(CELL_COUNT))
-height =1800
-width =1200
+
 # Colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 GREY = (128, 128, 128)
 GREEN = (0, 200, 0)
-
+RED = (255, 0, 0)
 # Fonts and FPS
 TITLE_FONT_SIZE = 50
 CELL_FONT_SIZE = 26
@@ -31,15 +30,15 @@ FPS = 60
 CELL_PADDING = 10
 
 # Equation Bar Constants
-EQUATION_BAR_HEIGHT = 100
-SLOT_MARGIN = 10
 SLOTS_PER_SIDE = 4
-EQUAL_SIGN_FONT_SIZE = 40
 BUTTON_FONT_SIZE = 30
-SLOT_WIDTH = height / 10
-SLOT_HEIGHT = width / 15
-CHECK_BUTTON_WIDTH = width / 10
-CHECK_BUTTON_HEIGHT = height / 36
+EQUATION_BAR_HEIGHT =100
+
+# Quit Button constants
+QUICK_BUTTON_WIDTH = 100
+QUICK_BUTTON_HEIGHT = 40
+
+
 
 
 def draw_background(screen, width, height) -> None:
@@ -57,6 +56,20 @@ def draw_background(screen, width, height) -> None:
 
     pygame.draw.rect(screen, GREY, [0, top_height, width, board_height])
     pygame.draw.rect(screen, BLACK, [0, height - bottom_height, width, bottom_height])
+
+def draw_quit_button(screen, width):
+        """Zeichnet den Quit-Button in der oberen rechten Ecke."""
+        button_x = width - QUICK_BUTTON_WIDTH - 20  # 20 px Abstand vom Rand
+        button_y = 20  # 20 px Abstand vom oberen Rand
+        quit_button_rect = pygame.Rect(button_x, button_y, QUICK_BUTTON_WIDTH, QUICK_BUTTON_HEIGHT)
+        pygame.draw.rect(screen, RED, quit_button_rect, border_radius=8)
+        font = pygame.font.Font(FONT_NAME, BUTTON_FONT_SIZE)
+        text = font.render("Quit", True, WHITE)
+        screen.blit(text, (
+            quit_button_rect.centerx - text.get_width() // 2,
+            quit_button_rect.centery - text.get_height() // 2))
+        return quit_button_rect
+
 
 
 def build_grid(width, height):
@@ -79,6 +92,16 @@ def build_grid(width, height):
 
 
 def build_equation_bar(width, height, screen):
+    #equation bar sizes
+    EQUATION_BAR_HEIGHT = height/11
+    SLOT_WIDTH = width/10
+    SLOT_HEIGHT = height/13
+    EQUAL_SIGN_FONT_SIZE = int(width/45)
+    SLOT_MARGIN = width/180
+    BUTTON_FONT_SIZE = int(width/45/60)
+    CHECK_BUTTON_WIDTH = width/15
+    CHECK_BUTTON_HEIGHT = height/22
+    BUTTON_FONT_SIZE = int(width/60)
     """Draw equation bar and return slot rects + button rect."""
     bar_top = height - EQUATION_BAR_HEIGHT
     bar_center_y = bar_top + EQUATION_BAR_HEIGHT // 2
@@ -86,6 +109,7 @@ def build_equation_bar(width, height, screen):
     slot_rects = []
     eq_font = pygame.font.Font(FONT_NAME, EQUAL_SIGN_FONT_SIZE)
     eq_text = eq_font.render("=", True, WHITE)
+
 
     total_slots_width = SLOT_WIDTH * (2 * SLOTS_PER_SIDE) + SLOT_MARGIN * (2 * SLOTS_PER_SIDE - 1)
     total_width = total_slots_width + eq_text.get_width() + CHECK_BUTTON_WIDTH + 40
@@ -201,7 +225,8 @@ def main() -> None:
     pygame.init()
     pygame.font.init()
 
-    width, height = 1800, 1200
+    display_info = pygame.display.Info()
+    width, height = display_info.current_w, display_info.current_h
     screen = pygame.display.set_mode((width, height), pygame.RESIZABLE)
     pygame.display.set_caption("Equatio")
 
@@ -311,13 +336,15 @@ def main() -> None:
                                 slots[i] = None
 
                     feedback_timer = pygame.time.get_ticks()
+                if draw_quit_button(screen, width).collidepoint(event.pos):
+                    running = False
 
             for dt in draggable_terms:
                 dt.handle_event(event, grid, slots, cell_rects, slot_rects)
 
         screen.fill(WHITE)
         draw_background(screen, width, height)
-
+        draw_quit_button(screen, width)
         # draw grid
         for (r, c), rect in cell_rects.items():
             if grid[r][c] is None:
@@ -351,3 +378,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
