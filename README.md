@@ -1,5 +1,15 @@
 # equatio
+## how to run
+1. Install Python 3.15+
+2. Create a virtual environment: python -m  venv .venv
+3. Activate the virtual enviroment:
+    on Linux/ macOS: source .venv/bn/activate
+    on Windows(CMD): .venv\Scripts\activate
+    on Windows (PowerShell): .venv\Scripts\Activate.ps1
+4. Install dependencies: pip install -r requirements.txt
+5. Start the game: python -m src/equatio/main.py
 
+## how to play
 Equatio is an interactive learn program.
 How to play:
 By default you can play with a set of 16 terms from the following equations:
