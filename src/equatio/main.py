@@ -32,13 +32,11 @@ CELL_PADDING = 10
 # Equation Bar Constants
 SLOTS_PER_SIDE = 4
 BUTTON_FONT_SIZE = 30
-EQUATION_BAR_HEIGHT =100
+EQUATION_BAR_HEIGHT = 100
 
 # Quit Button constants
 QUICK_BUTTON_WIDTH = 100
 QUICK_BUTTON_HEIGHT = 40
-
-
 
 
 def draw_background(screen, width, height) -> None:
@@ -57,19 +55,25 @@ def draw_background(screen, width, height) -> None:
     pygame.draw.rect(screen, GREY, [0, top_height, width, board_height])
     pygame.draw.rect(screen, BLACK, [0, height - bottom_height, width, bottom_height])
 
-def draw_quit_button(screen, width):
-        """Zeichnet den Quit-Button in der oberen rechten Ecke."""
-        button_x = width - QUICK_BUTTON_WIDTH - 20  # 20 px Abstand vom Rand
-        button_y = 20  # 20 px Abstand vom oberen Rand
-        quit_button_rect = pygame.Rect(button_x, button_y, QUICK_BUTTON_WIDTH, QUICK_BUTTON_HEIGHT)
-        pygame.draw.rect(screen, RED, quit_button_rect, border_radius=8)
-        font = pygame.font.Font(FONT_NAME, BUTTON_FONT_SIZE)
-        text = font.render("Quit", True, WHITE)
-        screen.blit(text, (
-            quit_button_rect.centerx - text.get_width() // 2,
-            quit_button_rect.centery - text.get_height() // 2))
-        return quit_button_rect
 
+def draw_quit_button(screen, width):
+    """Zeichnet den Quit-Button in der oberen rechten Ecke."""
+    button_x = width - QUICK_BUTTON_WIDTH - 20  # 20 px Abstand vom Rand
+    button_y = 20  # 20 px Abstand vom oberen Rand
+    quit_button_rect = pygame.Rect(
+        button_x, button_y, QUICK_BUTTON_WIDTH, QUICK_BUTTON_HEIGHT
+    )
+    pygame.draw.rect(screen, RED, quit_button_rect, border_radius=8)
+    font = pygame.font.Font(FONT_NAME, BUTTON_FONT_SIZE)
+    text = font.render("Quit", True, WHITE)
+    screen.blit(
+        text,
+        (
+            quit_button_rect.centerx - text.get_width() // 2,
+            quit_button_rect.centery - text.get_height() // 2,
+        ),
+    )
+    return quit_button_rect
 
 
 def build_grid(width, height):
@@ -92,16 +96,16 @@ def build_grid(width, height):
 
 
 def build_equation_bar(width, height, screen):
-    #equation bar sizes
-    EQUATION_BAR_HEIGHT = height/11
-    SLOT_WIDTH = width/10
-    SLOT_HEIGHT = height/13
-    EQUAL_SIGN_FONT_SIZE = int(width/45)
-    SLOT_MARGIN = width/180
-    BUTTON_FONT_SIZE = int(width/60)
-    CHECK_BUTTON_WIDTH = width/15
-    CHECK_BUTTON_HEIGHT = height/22
-    BUTTON_FONT_SIZE = int(width/60)
+    # equation bar sizes
+    EQUATION_BAR_HEIGHT = height / 11
+    SLOT_WIDTH = width / 10
+    SLOT_HEIGHT = height / 13
+    EQUAL_SIGN_FONT_SIZE = int(width / 45)
+    SLOT_MARGIN = width / 180
+    BUTTON_FONT_SIZE = int(width / 60)
+    CHECK_BUTTON_WIDTH = width / 15
+    CHECK_BUTTON_HEIGHT = height / 22
+    BUTTON_FONT_SIZE = int(width / 60)
     """Draw equation bar and return slot rects + button rect."""
     bar_top = height - EQUATION_BAR_HEIGHT
     bar_center_y = bar_top + EQUATION_BAR_HEIGHT // 2
@@ -110,8 +114,9 @@ def build_equation_bar(width, height, screen):
     eq_font = pygame.font.Font(FONT_NAME, EQUAL_SIGN_FONT_SIZE)
     eq_text = eq_font.render("=", True, WHITE)
 
-
-    total_slots_width = SLOT_WIDTH * (2 * SLOTS_PER_SIDE) + SLOT_MARGIN * (2 * SLOTS_PER_SIDE - 1)
+    total_slots_width = SLOT_WIDTH * (2 * SLOTS_PER_SIDE) + SLOT_MARGIN * (
+        2 * SLOTS_PER_SIDE - 1
+    )
     total_width = total_slots_width + eq_text.get_width() + CHECK_BUTTON_WIDTH + 40
     start_x = (width - total_width) / 2
 
@@ -137,12 +142,19 @@ def build_equation_bar(width, height, screen):
     # Check button
     button_x = slot_rects[-1].right + 30
     button_y = bar_center_y - CHECK_BUTTON_HEIGHT // 2
-    check_button_rect = pygame.Rect(button_x, button_y, CHECK_BUTTON_WIDTH, CHECK_BUTTON_HEIGHT)
+    check_button_rect = pygame.Rect(
+        button_x, button_y, CHECK_BUTTON_WIDTH, CHECK_BUTTON_HEIGHT
+    )
     pygame.draw.rect(screen, GREEN, check_button_rect, border_radius=8)
     button_font = pygame.font.Font(FONT_NAME, BUTTON_FONT_SIZE)
     button_text = button_font.render("Check", True, WHITE)
-    screen.blit(button_text, (check_button_rect.centerx - button_text.get_width() // 2,
-                              check_button_rect.centery - button_text.get_height() // 2))
+    screen.blit(
+        button_text,
+        (
+            check_button_rect.centerx - button_text.get_width() // 2,
+            check_button_rect.centery - button_text.get_height() // 2,
+        ),
+    )
 
     return slot_rects, check_button_rect
 
@@ -150,16 +162,27 @@ def build_equation_bar(width, height, screen):
 class DraggableTerm:
     """Class representing a draggable term bound to a grid cell or equation slot."""
 
-    def __init__(self, term: Term, pos_key, rect, container="grid", s_width=0,):
+    def __init__(
+        self,
+        term: Term,
+        pos_key,
+        rect,
+        container="grid",
+        s_width=0,
+    ):
         self.term = term
         self.image = pygame.image.load(term.get_sprite_path()).convert_alpha()
         original_width, original_height = self.image.get_size()
-        desired_width, desired_height = (s_width/12, s_width/30)
-        scale_factor = min(desired_width / original_width, desired_height / original_height)
-        new_size = (int(original_width * scale_factor), int(original_height * scale_factor))
+        desired_width, desired_height = (s_width / 12, s_width / 30)
+        scale_factor = min(
+            desired_width / original_width, desired_height / original_height
+        )
+        new_size = (
+            int(original_width * scale_factor),
+            int(original_height * scale_factor),
+        )
         self.image = pygame.transform.smoothscale(self.image, new_size)
         self.rect = self.image.get_rect(center=rect.center)
-
 
         # position info
         self.pos_key = pos_key  # (row, col) or slot index
@@ -176,7 +199,10 @@ class DraggableTerm:
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.rect.collidepoint(event.pos):
                 self.dragging = True
-                self.mouse_offset = (self.rect.x - event.pos[0], self.rect.y - event.pos[1])
+                self.mouse_offset = (
+                    self.rect.x - event.pos[0],
+                    self.rect.y - event.pos[1],
+                )
                 # clear current container
                 if self.container == "grid":
                     r, c = self.pos_key
@@ -238,7 +264,7 @@ def main() -> None:
 
     clock = pygame.time.Clock()
     running = True
-    
+
     feedback_message = ""
     feedback_timer = 0
     font = pygame.font.Font(FONT_NAME, 32)
@@ -250,7 +276,7 @@ def main() -> None:
     cell_rects = build_grid(width, height)
     slot_rects, check_button_rect = build_equation_bar(width, height, screen)
 
-# === Load equation set and extract terms from JSON ===
+    # === Load equation set and extract terms from JSON ===
     # change file name to the one you actually want to load
     equation_set = EquationSet.from_json(JSON_DIR / "standard_set.json")
     all_terms = equation_set.all_terms
@@ -262,7 +288,7 @@ def main() -> None:
     draggable_terms = []
     for term, pos in zip(all_terms, available_positions):
         rect = cell_rects[pos]
-        dt = DraggableTerm(term, pos, rect, "grid",width)
+        dt = DraggableTerm(term, pos, rect, "grid", width)
         grid[pos[0]][pos[1]] = dt
         draggable_terms.append(dt)
     # Note: If there are more terms than cells, some terms will not be placed.
@@ -289,20 +315,29 @@ def main() -> None:
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if check_button_rect.collidepoint(event.pos):
                     # --- Collect terms from slots ---
-                    left_terms = [slots[i].term for i in range(SLOTS_PER_SIDE) if slots[i]]
-                    right_terms = [slots[i].term for i in range(SLOTS_PER_SIDE, 2 * SLOTS_PER_SIDE) if slots[i]]
+                    left_terms = [
+                        slots[i].term for i in range(SLOTS_PER_SIDE) if slots[i]
+                    ]
+                    right_terms = [
+                        slots[i].term
+                        for i in range(SLOTS_PER_SIDE, 2 * SLOTS_PER_SIDE)
+                        if slots[i]
+                    ]
 
                     # --- Check against equations in set ---
                     correct = False
-                    
+
                     left_codes = sorted([t.latex_code for t in left_terms])
                     right_codes = sorted([t.latex_code for t in right_terms])
 
                     for eq in equation_set.equations:
-                        if ((left_codes == [t.latex_code for t in eq.left] and
-                            right_codes == [t.latex_code for t in eq.right]) or
-                            (left_codes == [t.latex_code for t in eq.right] and
-                            right_codes == [t.latex_code for t in eq.left])):
+                        if (
+                            left_codes == [t.latex_code for t in eq.left]
+                            and right_codes == [t.latex_code for t in eq.right]
+                        ) or (
+                            left_codes == [t.latex_code for t in eq.right]
+                            and right_codes == [t.latex_code for t in eq.left]
+                        ):
                             correct = True
                             break
                     # --- after checking for correct equation ---
@@ -353,11 +388,8 @@ def main() -> None:
         draw_quit_button(screen, width)
         # draw grid
         for (r, c), rect in cell_rects.items():
-            if grid[r][c] is None:
-                continue
-            else:
+            if grid[r][c]:  # term on grid position, draw white background rectangle
                 pygame.draw.rect(screen, WHITE, rect, border_radius=4)
-            pygame.draw.rect(screen, GREY, rect, 1)
         # equation bar (rebuild each frame)
         slot_rects, check_button_rect = build_equation_bar(width, height, screen)
 
@@ -369,13 +401,18 @@ def main() -> None:
 
         for dt in draggable_terms:
             dt.draw(screen)
-            
+
         # Draw feedback message for 2 seconds
         if feedback_message and pygame.time.get_ticks() - feedback_timer < 2000:
             color = (0, 200, 0) if correct else (200, 0, 0)
             msg_surf = font.render(feedback_message, True, color)
-            screen.blit(msg_surf, (width // 2 - msg_surf.get_width() // 2,
-                                   height - EQUATION_BAR_HEIGHT - 40))
+            screen.blit(
+                msg_surf,
+                (
+                    width // 2 - msg_surf.get_width() // 2,
+                    height - EQUATION_BAR_HEIGHT - 40,
+                ),
+            )
 
         pygame.display.flip()
 
@@ -384,4 +421,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

@@ -15,6 +15,7 @@ SPRITE_DIR = _DATA_DIR / "sprites"
 # Default name constant
 _DEFAULT_SET_NAME = "MyEquations"
 
+
 class EquationSet:
     """A collection of equation objects."""
 

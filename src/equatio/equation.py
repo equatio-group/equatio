@@ -17,8 +17,9 @@ SPRITE_DIR = _DATA_DIR / "sprites"
 # Default name constant
 _DEFAULT_SET_NAME = "MyEquations"
 
-#Default empty equation
+# Default empty equation
 ZERO_TERM = Term("0", "0", "+")
+
 
 class Equation:
     """An equation with terms divided into left and right part."""
@@ -44,12 +45,12 @@ class Equation:
         return self.left == other.left and self.right == other.right  # already sorted
 
     def add_right(self, new_right: Term) -> None:
-        """ Add a new term to the right side of the equation."""
+        """Add a new term to the right side of the equation."""
         if not isinstance(new_right, Term):
             raise ValueError("Only Term objects can be added.")
         if new_right not in self.right:
             self.right.append(new_right)
-            self.right=sorted(self.right, key=lambda t: t.latex_code)
+            self.right = sorted(self.right, key=lambda t: t.latex_code)
 
     def add_left(self, new_left: Term) -> None:
         """Add a new term to the left side of the equation."""
@@ -57,9 +58,9 @@ class Equation:
             raise ValueError("Only Term objects can be added.")
         if new_left not in self.left:
             self.left.append(new_left)
-            self.left=sorted(self.left, key=lambda t: t.latex_code)
+            self.left = sorted(self.left, key=lambda t: t.latex_code)
 
-    def remove_right(self,removed_right: Term) -> None:
+    def remove_right(self, removed_right: Term) -> None:
         """Remove a term from the right side of the equation."""
         if not isinstance(removed_right, Term):
             raise ValueError("Object to remove must be a Term")
@@ -69,7 +70,7 @@ class Equation:
             self.right.remove(removed_right)
         self.right = self.right or [ZERO_TERM]
 
-    def remove_left(self,removed_left: Term) -> None:
+    def remove_left(self, removed_left: Term) -> None:
         """Remove a term from the left side of the equation."""
         if not isinstance(removed_left, Term):
             raise ValueError("Object to remove must be a Term")
@@ -121,7 +122,3 @@ class Equation:
                 )
             ]
         )
-
-
-
-

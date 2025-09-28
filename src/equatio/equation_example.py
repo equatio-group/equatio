@@ -5,7 +5,6 @@ from src.equatio.equation_set import EquationSet
 from src.equatio.term import Term
 
 
-
 _DATA_DIR = Path(__file__).parents[2]
 JSON_DIR = _DATA_DIR / "data"
 
@@ -60,9 +59,9 @@ if __name__ == "__main__":
     # ...it should be the same as before
     print(f"{EQUATION_SET_FROM_EQUATIONS == equation_set1_reload=}")
 
-    #Testing add and remove methods
-    NEWTERM1 = Term("\\tau_w","\\frac{\\tau_w}{\\rho}","+")
-    NEWTERM2 = Term("U_*^2","U_*^2","+")
+    # Testing add and remove methods
+    NEWTERM1 = Term("\\tau_w", "\\frac{\\tau_w}{\\rho}", "+")
+    NEWTERM2 = Term("U_*^2", "U_*^2", "+")
     print(EQUATION_1)
     print(isinstance(NEWTERM1, Term))
     print(not isinstance(NEWTERM1, Term))
@@ -71,11 +70,11 @@ if __name__ == "__main__":
     print(EQUATION_1)
 
     EQUATION_1.remove_left(NEWTERM1)
-    #EQUATION_1.remove_left(NEWTERM2)
+    # EQUATION_1.remove_left(NEWTERM2)
     EQUATION_1.remove_right(NEWTERM2)
     print(EQUATION_1)
 
-    #additional test of zero term
+    # additional test of zero term
     EQUATION_1.remove_left(TERM_1)
     print(EQUATION_1)
     EQUATION_1.remove_right(TERM_2)
