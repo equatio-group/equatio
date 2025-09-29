@@ -95,57 +95,59 @@ def build_grid(width: int, height: int) -> dict[tuple[int, int], pygame.Rect]:
 def build_equation_bar(
     width: int, height: int, screen: pygame.Surface
 ) -> tuple[list[pygame.Rect], pygame.Rect]:
-    # equation bar sizes
-    EQUATION_BAR_HEIGHT = height / 11
-    SLOT_WIDTH = width / 10
-    SLOT_HEIGHT = height / 13
-    EQUAL_SIGN_FONT_SIZE = int(width / 45)
-    SLOT_MARGIN = width / 180
-    BUTTON_FONT_SIZE = int(width / 60)
-    CHECK_BUTTON_WIDTH = width / 15
-    CHECK_BUTTON_HEIGHT = height / 22
-    BUTTON_FONT_SIZE = int(width / 60)
     """Draw equation bar and return slot rects + button rect."""
-    bar_top = height - EQUATION_BAR_HEIGHT
-    bar_center_y = bar_top + EQUATION_BAR_HEIGHT // 2
+
+    # equation bar sizes
+    equation_bar_height = height / 11
+    slot_width = width / 10
+    slot_height = height / 13
+    equal_sign_font_size = int(width / 45)
+    slot_margin = width / 180
+    button_font_size = int(width / 60)
+    check_button_width = width / 15
+    check_button_height = height / 22
+    button_font_size = int(width / 60)
+
+    bar_top = height - equation_bar_height
+    bar_center_y = bar_top + equation_bar_height // 2
 
     slot_rects = []
-    eq_font = pygame.font.Font(FONT_NAME, EQUAL_SIGN_FONT_SIZE)
+    eq_font = pygame.font.Font(FONT_NAME, equal_sign_font_size)
     eq_text = eq_font.render("=", True, WHITE)
 
-    total_slots_width = SLOT_WIDTH * (2 * SLOTS_PER_SIDE) + SLOT_MARGIN * (
+    total_slots_width = slot_width * (2 * SLOTS_PER_SIDE) + slot_margin * (
         2 * SLOTS_PER_SIDE - 1
     )
-    total_width = total_slots_width + eq_text.get_width() + CHECK_BUTTON_WIDTH + 40
+    total_width = total_slots_width + eq_text.get_width() + check_button_width + 40
     start_x = (width - total_width) / 2
 
     # Left-hand slots
     for i in range(SLOTS_PER_SIDE):
-        x = start_x + i * (SLOT_WIDTH + SLOT_MARGIN)
-        rect = pygame.Rect(x, bar_center_y - SLOT_HEIGHT // 2, SLOT_WIDTH, SLOT_HEIGHT)
+        x = start_x + i * (slot_width + slot_margin)
+        rect = pygame.Rect(x, bar_center_y - slot_height // 2, slot_width, slot_height)
         pygame.draw.rect(screen, GREY, rect, border_radius=5)
         slot_rects.append(rect)
 
     # Equal sign
-    eq_x = slot_rects[-1].right + SLOT_MARGIN
+    eq_x = slot_rects[-1].right + slot_margin
     screen.blit(eq_text, (eq_x, bar_center_y - eq_text.get_height() // 2))
 
     # Right-hand slots
-    rhs_start_x = eq_x + eq_text.get_width() + SLOT_MARGIN
+    rhs_start_x = eq_x + eq_text.get_width() + slot_margin
     for i in range(SLOTS_PER_SIDE):
-        x = rhs_start_x + i * (SLOT_WIDTH + SLOT_MARGIN)
-        rect = pygame.Rect(x, bar_center_y - SLOT_HEIGHT // 2, SLOT_WIDTH, SLOT_HEIGHT)
+        x = rhs_start_x + i * (slot_width + slot_margin)
+        rect = pygame.Rect(x, bar_center_y - slot_height // 2, slot_width, slot_height)
         pygame.draw.rect(screen, GREY, rect, border_radius=5)
         slot_rects.append(rect)
 
     # Check button
     button_x = slot_rects[-1].right + 30
-    button_y = bar_center_y - CHECK_BUTTON_HEIGHT // 2
+    button_y = bar_center_y - check_button_height // 2
     check_button_rect = pygame.Rect(
-        button_x, button_y, CHECK_BUTTON_WIDTH, CHECK_BUTTON_HEIGHT
+        button_x, button_y, check_button_width, check_button_height
     )
     pygame.draw.rect(screen, GREEN, check_button_rect, border_radius=8)
-    button_font = pygame.font.Font(FONT_NAME, BUTTON_FONT_SIZE)
+    button_font = pygame.font.Font(FONT_NAME, button_font_size)
     button_text = button_font.render("Check", True, WHITE)
     screen.blit(
         button_text,
