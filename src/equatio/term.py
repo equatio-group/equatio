@@ -1,3 +1,6 @@
+# Class for the representation of a term within an equation
+# (only logic for objects, no GUI or game logic)
+
 from __future__ import annotations
 import hashlib
 from pathlib import Path

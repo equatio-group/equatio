@@ -1,4 +1,4 @@
-# Classes for equations and terms, including JSON import/export and sprite generation
+# Class for the representation of an equation
 # (only logic for objects, no GUI or game logic)
 
 
