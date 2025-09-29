@@ -168,7 +168,7 @@ def main() -> None:
         # Equation bar (rebuild each frame)
         slot_rects, check_button_rect = build_equation_bar(width, height, screen)
 
-        # re-center slot terms on resize
+        # Re-center slot terms on resize
         for idx, dt in enumerate(slots):
             if dt:
                 dt.rect.center = slot_rects[idx].center

@@ -138,8 +138,8 @@ def build_equation_bar(
 
 def draw_quit_button(screen: pygame.Surface, width: int) -> pygame.Rect:
     """Draws the quit button in the upper right corner."""
-    button_x = width - QUICK_BUTTON_WIDTH - 20  # 20 px spacing from right edge
-    button_y = 20  # 20 px spacing from top edge
+    button_x = width - QUICK_BUTTON_WIDTH - 20
+    button_y = 20
     quit_button_rect = pygame.Rect(
         button_x, button_y, QUICK_BUTTON_WIDTH, QUICK_BUTTON_HEIGHT
     )
