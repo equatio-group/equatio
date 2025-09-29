@@ -1,6 +1,6 @@
 # equatio
 ## how to run
-1. Install Python 3.15+
+1. Install Python 3.9+
 2. Create a virtual environment: python -m  venv .venv
 3. Activate the virtual enviroment:
     on Linux/ macOS: source .venv/bn/activate
