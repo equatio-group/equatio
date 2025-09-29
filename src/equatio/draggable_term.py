@@ -1,4 +1,4 @@
-# Class for a draggable term on the GUI
+# Class for a draggable term on the GUI.
 
 from __future__ import annotations
 
@@ -39,6 +39,7 @@ class DraggableTerm:
         self.origin_rect = rect
         self.origin_container = container
         self.dragging = False
+        self.mouse_offset: tuple[int, int] = (0, 0)
 
     def draw(self, screen: pygame.Surface) -> None:
         screen.blit(self.image, self.rect.topleft)
