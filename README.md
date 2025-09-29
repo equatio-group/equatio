@@ -33,6 +33,6 @@ You can quit the game at any time by clicking on the Quit button.
 Have fun playing!
 
 ## Project status
-This version can be played using a standard set of sixteen terms and five equations (see [above](#how-to-play)). You can change the set of equations and terms by editing the `standard_set.json` file in the `data/` folder. However, the game currently does not work properly with more than 16 terms in the set. You also need to follow the given `JSON` structure and use the correct $\LaTeX$ code (with double backslashes instead of single backslashes) for [Matplotlib](https://matplotlib.org/) to display the terms correctly.
+This version can be played using a standard set of sixteen terms and five equations (see [above](#how-to-play)). You can change the set of equations and terms by editing the `standard_set.json` file in the `data/` folder. However, the game currently does not work properly with more than 16 terms in the set and more than four terms per equation side. You also need to follow the given `JSON` structure and use the correct $\LaTeX$ code (with double backslashes instead of single backslashes) for [Matplotlib](https://matplotlib.org/) to display the terms correctly.
 
-Support for a variable set sizes and a more user-friendly way to create, save, load, and modify custom equation sets is planned for future versions.
+Support for a variable set sizes and a more user-friendly way to create, save, load, and modify custom equation sets is planned for future versions. Also, the implementation of checks in main.py will be simplified by using already implemented class methods from EquationSet, Equation, and Term. Furthermore, the scaling of sprites will be improved to work flexibly with different sizes of $\LaTeX$ term representations.
