@@ -1,19 +1,15 @@
-"""Main game environment using pygame with drag-and-drop between board and equation bar."""
+# Main game environment using pygame with drag-and-drop between board and equation bar.
 
-import random
 from itertools import product
+import random
 
 import numpy as np
 import pygame
 
-
-from term import Term
 from equation_set import EquationSet, JSON_DIR
+from term import Term
 
-# === Constants ===
-CELL_COUNT = 16
-GRID_SIZE = int(np.sqrt(CELL_COUNT))
-
+# CONSTANTS
 # Colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -25,16 +21,16 @@ TITLE_FONT_SIZE = 50
 CELL_FONT_SIZE = 26
 FONT_NAME = "freesansbold.ttf"
 FPS = 60
-
+# Grid
+CELL_COUNT = 16
+GRID_SIZE = int(np.sqrt(CELL_COUNT))
 # Padding between cells
 CELL_PADDING = 10
-
-# Equation Bar Constants
+# Equation Bar
 SLOTS_PER_SIDE = 4
 BUTTON_FONT_SIZE = 30
 EQUATION_BAR_HEIGHT = 100
-
-# Quit Button constants
+# Quit Button
 QUICK_BUTTON_WIDTH = 100
 QUICK_BUTTON_HEIGHT = 40
 
