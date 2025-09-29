@@ -1,5 +1,6 @@
 # Main game environment using pygame with drag-and-drop between board and equation bar.
 
+from __future__ import annotations
 from itertools import product
 import random
 
@@ -35,7 +36,7 @@ QUICK_BUTTON_WIDTH = 100
 QUICK_BUTTON_HEIGHT = 40
 
 
-def draw_background(screen, width, height) -> None:
+def draw_background(screen: pygame.Surface, width: int, height: int) -> None:
     """Draws the top, middle, and bottom UI sections."""
     title_font = pygame.font.Font(FONT_NAME, TITLE_FONT_SIZE)
 
@@ -52,7 +53,7 @@ def draw_background(screen, width, height) -> None:
     pygame.draw.rect(screen, BLACK, [0, height - bottom_height, width, bottom_height])
 
 
-def draw_quit_button(screen, width):
+def draw_quit_button(screen: pygame.Surface, width: int) -> pygame.Rect:
     """Zeichnet den Quit-Button in der oberen rechten Ecke."""
     button_x = width - QUICK_BUTTON_WIDTH - 20  # 20 px Abstand vom Rand
     button_y = 20  # 20 px Abstand vom oberen Rand
@@ -72,7 +73,7 @@ def draw_quit_button(screen, width):
     return quit_button_rect
 
 
-def build_grid(width, height):
+def build_grid(width: int, height: int) -> dict[tuple[int, int], pygame.Rect]:
     """Compute grid cell rects based on window size."""
     top_height = height / 8
     bottom_height = height / 8
@@ -91,7 +92,9 @@ def build_grid(width, height):
     return cell_rects
 
 
-def build_equation_bar(width, height, screen):
+def build_equation_bar(
+    width: int, height: int, screen: pygame.Surface
+) -> tuple[list[pygame.Rect], pygame.Rect]:
     # equation bar sizes
     EQUATION_BAR_HEIGHT = height / 11
     SLOT_WIDTH = width / 10
@@ -161,11 +164,11 @@ class DraggableTerm:
     def __init__(
         self,
         term: Term,
-        pos_key,
-        rect,
-        container="grid",
-        s_width=0,
-    ):
+        pos_key: tuple[int, int] | int,
+        rect: pygame.Rect,
+        container: str = "grid",
+        s_width: int = 0,
+    ) -> None:
         self.term = term
         self.image = pygame.image.load(term.get_sprite_path()).convert_alpha()
         original_width, original_height = self.image.get_size()
@@ -188,10 +191,17 @@ class DraggableTerm:
         self.origin_container = container
         self.dragging = False
 
-    def draw(self, screen):
+    def draw(self, screen: pygame.Surface) -> None:
         screen.blit(self.image, self.rect.topleft)
 
-    def handle_event(self, event, grid, slots, cell_rects, slot_rects):
+    def handle_event(
+        self,
+        event: pygame.event.Event,
+        grid: list[list[DraggableTerm | None]],
+        slots: list[DraggableTerm | None],
+        cell_rects: dict[tuple[int, int], pygame.Rect],
+        slot_rects: list[pygame.Rect],
+    ) -> None:
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.rect.collidepoint(event.pos):
                 self.dragging = True
