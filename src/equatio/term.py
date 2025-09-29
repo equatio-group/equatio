@@ -9,6 +9,7 @@ _DATA_DIR = Path(__file__).parents[2]
 JSON_DIR = _DATA_DIR / "data"
 SPRITE_DIR = _DATA_DIR / "sprites"
 
+
 class Term:
     """Part of an Equation."""
 
