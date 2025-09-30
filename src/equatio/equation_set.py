@@ -1,3 +1,6 @@
+# Class for the representation of an equation set
+# (only logic for objects, no GUI or game logic)
+
 from __future__ import annotations
 import itertools
 import json

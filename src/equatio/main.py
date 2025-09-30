@@ -1,297 +1,76 @@
-"""Main game environment using pygame with drag-and-drop between board and equation bar."""
+# Main game environment using pygame with drag-and-drop between board and equation bar.
 
+from __future__ import annotations
 import random
-from itertools import product
 
-import numpy as np
 import pygame
 
-
-from term import Term
+from draggable_term import DraggableTerm
 from equation_set import EquationSet, JSON_DIR
-
-# === Constants ===
-CELL_COUNT = 16
-GRID_SIZE = int(np.sqrt(CELL_COUNT))
-
-# Colors
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-GREY = (128, 128, 128)
-GREEN = (0, 200, 0)
-RED = (255, 0, 0)
-# Fonts and FPS
-TITLE_FONT_SIZE = 50
-CELL_FONT_SIZE = 26
-FONT_NAME = "freesansbold.ttf"
-FPS = 60
-
-# Padding between cells
-CELL_PADDING = 10
-
-# Equation Bar Constants
-SLOTS_PER_SIDE = 4
-BUTTON_FONT_SIZE = 30
-EQUATION_BAR_HEIGHT = 100
-
-# Quit Button constants
-QUICK_BUTTON_WIDTH = 100
-QUICK_BUTTON_HEIGHT = 40
-
-
-def draw_background(screen, width, height) -> None:
-    """Draws the top, middle, and bottom UI sections."""
-    title_font = pygame.font.Font(FONT_NAME, TITLE_FONT_SIZE)
-
-    # Top menu height (1/8 of height)
-    top_height = height / 8
-    bottom_height = height / 8
-    board_height = height - top_height - bottom_height
-
-    pygame.draw.rect(screen, BLACK, [0, 0, width, top_height])
-    title_text = title_font.render("Equatio", True, WHITE)
-    screen.blit(title_text, (0.0125 * width, 0.025 * height))
-
-    pygame.draw.rect(screen, GREY, [0, top_height, width, board_height])
-    pygame.draw.rect(screen, BLACK, [0, height - bottom_height, width, bottom_height])
-
-
-def draw_quit_button(screen, width):
-    """Zeichnet den Quit-Button in der oberen rechten Ecke."""
-    button_x = width - QUICK_BUTTON_WIDTH - 20  # 20 px Abstand vom Rand
-    button_y = 20  # 20 px Abstand vom oberen Rand
-    quit_button_rect = pygame.Rect(
-        button_x, button_y, QUICK_BUTTON_WIDTH, QUICK_BUTTON_HEIGHT
-    )
-    pygame.draw.rect(screen, RED, quit_button_rect, border_radius=8)
-    font = pygame.font.Font(FONT_NAME, BUTTON_FONT_SIZE)
-    text = font.render("Quit", True, WHITE)
-    screen.blit(
-        text,
-        (
-            quit_button_rect.centerx - text.get_width() // 2,
-            quit_button_rect.centery - text.get_height() // 2,
-        ),
-    )
-    return quit_button_rect
-
-
-def build_grid(width, height):
-    """Compute grid cell rects based on window size."""
-    top_height = height / 8
-    bottom_height = height / 8
-    board_height = height - top_height - bottom_height
-    board_width = width
-
-    cell_width = (board_width - (GRID_SIZE + 1) * CELL_PADDING) / GRID_SIZE
-    cell_height = (board_height - (GRID_SIZE + 1) * CELL_PADDING) / GRID_SIZE
-
-    cell_rects = {}
-    for row, col in product(range(GRID_SIZE), range(GRID_SIZE)):
-        x = CELL_PADDING + col * (cell_width + CELL_PADDING)
-        y = top_height + CELL_PADDING + row * (cell_height + CELL_PADDING)
-        rect = pygame.Rect(x, y, cell_width, cell_height)
-        cell_rects[(row, col)] = rect
-    return cell_rects
-
-
-def build_equation_bar(width, height, screen):
-    # equation bar sizes
-    EQUATION_BAR_HEIGHT = height / 11
-    SLOT_WIDTH = width / 10
-    SLOT_HEIGHT = height / 13
-    EQUAL_SIGN_FONT_SIZE = int(width / 45)
-    SLOT_MARGIN = width / 180
-    BUTTON_FONT_SIZE = int(width / 60)
-    CHECK_BUTTON_WIDTH = width / 15
-    CHECK_BUTTON_HEIGHT = height / 22
-    BUTTON_FONT_SIZE = int(width / 60)
-    """Draw equation bar and return slot rects + button rect."""
-    bar_top = height - EQUATION_BAR_HEIGHT
-    bar_center_y = bar_top + EQUATION_BAR_HEIGHT // 2
-
-    slot_rects = []
-    eq_font = pygame.font.Font(FONT_NAME, EQUAL_SIGN_FONT_SIZE)
-    eq_text = eq_font.render("=", True, WHITE)
-
-    total_slots_width = SLOT_WIDTH * (2 * SLOTS_PER_SIDE) + SLOT_MARGIN * (
-        2 * SLOTS_PER_SIDE - 1
-    )
-    total_width = total_slots_width + eq_text.get_width() + CHECK_BUTTON_WIDTH + 40
-    start_x = (width - total_width) / 2
-
-    # Left-hand slots
-    for i in range(SLOTS_PER_SIDE):
-        x = start_x + i * (SLOT_WIDTH + SLOT_MARGIN)
-        rect = pygame.Rect(x, bar_center_y - SLOT_HEIGHT // 2, SLOT_WIDTH, SLOT_HEIGHT)
-        pygame.draw.rect(screen, GREY, rect, border_radius=5)
-        slot_rects.append(rect)
-
-    # Equal sign
-    eq_x = slot_rects[-1].right + SLOT_MARGIN
-    screen.blit(eq_text, (eq_x, bar_center_y - eq_text.get_height() // 2))
-
-    # Right-hand slots
-    rhs_start_x = eq_x + eq_text.get_width() + SLOT_MARGIN
-    for i in range(SLOTS_PER_SIDE):
-        x = rhs_start_x + i * (SLOT_WIDTH + SLOT_MARGIN)
-        rect = pygame.Rect(x, bar_center_y - SLOT_HEIGHT // 2, SLOT_WIDTH, SLOT_HEIGHT)
-        pygame.draw.rect(screen, GREY, rect, border_radius=5)
-        slot_rects.append(rect)
-
-    # Check button
-    button_x = slot_rects[-1].right + 30
-    button_y = bar_center_y - CHECK_BUTTON_HEIGHT // 2
-    check_button_rect = pygame.Rect(
-        button_x, button_y, CHECK_BUTTON_WIDTH, CHECK_BUTTON_HEIGHT
-    )
-    pygame.draw.rect(screen, GREEN, check_button_rect, border_radius=8)
-    button_font = pygame.font.Font(FONT_NAME, BUTTON_FONT_SIZE)
-    button_text = button_font.render("Check", True, WHITE)
-    screen.blit(
-        button_text,
-        (
-            check_button_rect.centerx - button_text.get_width() // 2,
-            check_button_rect.centery - button_text.get_height() // 2,
-        ),
-    )
-
-    return slot_rects, check_button_rect
-
-
-class DraggableTerm:
-    """Class representing a draggable term bound to a grid cell or equation slot."""
-
-    def __init__(
-        self,
-        term: Term,
-        pos_key,
-        rect,
-        container="grid",
-        s_width=0,
-    ):
-        self.term = term
-        self.image = pygame.image.load(term.get_sprite_path()).convert_alpha()
-        original_width, original_height = self.image.get_size()
-        desired_width, desired_height = (s_width / 12, s_width / 30)
-        scale_factor = min(
-            desired_width / original_width, desired_height / original_height
-        )
-        new_size = (
-            int(original_width * scale_factor),
-            int(original_height * scale_factor),
-        )
-        self.image = pygame.transform.smoothscale(self.image, new_size)
-        self.rect = self.image.get_rect(center=rect.center)
-
-        # position info
-        self.pos_key = pos_key  # (row, col) or slot index
-        self.container = container  # "grid" or "slot"
-        self.origin_key = pos_key
-        self.origin_rect = rect
-        self.origin_container = container
-        self.dragging = False
-
-    def draw(self, screen):
-        screen.blit(self.image, self.rect.topleft)
-
-    def handle_event(self, event, grid, slots, cell_rects, slot_rects):
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if self.rect.collidepoint(event.pos):
-                self.dragging = True
-                self.mouse_offset = (
-                    self.rect.x - event.pos[0],
-                    self.rect.y - event.pos[1],
-                )
-                # clear current container
-                if self.container == "grid":
-                    r, c = self.pos_key
-                    grid[r][c] = None
-                elif self.container == "slot":
-                    slots[self.pos_key] = None
-
-        elif event.type == pygame.MOUSEBUTTONUP and self.dragging:
-            self.dragging = False
-            x, y = event.pos
-
-            # check grid cells
-            for (r, c), rect in cell_rects.items():
-                if rect.collidepoint((x, y)) and grid[r][c] is None:
-                    self.container = "grid"
-                    self.pos_key = (r, c)
-                    self.rect.center = rect.center
-                    grid[r][c] = self
-                    self.origin_key = self.pos_key
-                    self.origin_rect = rect
-                    self.origin_container = "grid"
-                    return
-
-            # check slot rects
-            for idx, rect in enumerate(slot_rects):
-                if rect.collidepoint((x, y)) and slots[idx] is None:
-                    self.container = "slot"
-                    self.pos_key = idx
-                    self.rect.center = rect.center
-                    slots[idx] = self
-                    self.origin_key = self.pos_key
-                    self.origin_rect = rect
-                    self.origin_container = "slot"
-                    return
-
-            # else return to origin
-            self.pos_key = self.origin_key
-            self.rect.center = self.origin_rect.center
-            self.container = self.origin_container
-            if self.container == "grid":
-                r, c = self.pos_key
-                grid[r][c] = self
-            else:
-                slots[self.pos_key] = self
-
-        elif event.type == pygame.MOUSEMOTION and self.dragging:
-            self.rect.x = event.pos[0] + self.mouse_offset[0]
-            self.rect.y = event.pos[1] + self.mouse_offset[1]
+from gui import (
+    EQUATION_BAR_HEIGHT,
+    FONT_NAME,
+    FPS,
+    GRID_SIZE,
+    SLOTS_PER_SIDE,
+    WHITE,
+    draw_background,
+    draw_quit_button,
+    build_grid,
+    build_equation_bar,
+)
+from term import Term
 
 
 def main() -> None:
+    # Initialising variables
+    running: bool = True
+    feedback_message: str = ""
+    feedback_timer: int = 0
+    correct: bool = False
+
+    # Initialising pygame
     pygame.init()
     pygame.font.init()
-
+    font: pygame.font.Font = pygame.font.Font(FONT_NAME, 32)
+    clock: pygame.time.Clock = pygame.time.Clock()
     display_info = pygame.display.Info()
-    width, height = display_info.current_w, display_info.current_h
-    screen = pygame.display.set_mode((width, height), pygame.RESIZABLE)
-    pygame.display.set_caption("Equatio")
+    # Set up the display
+    width: int = display_info.current_w
+    height: int = display_info.current_h
+    screen: pygame.Surface = pygame.display.set_mode((width, height), pygame.RESIZABLE)
+    pygame.display.set_caption("equatio")
 
-    clock = pygame.time.Clock()
-    running = True
+    # Initialise containers
+    grid: list[list[DraggableTerm | None]] = [
+        [None for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)
+    ]
+    slots: list[DraggableTerm | None] = [None for _ in range(2 * SLOTS_PER_SIDE)]
 
-    feedback_message = ""
-    feedback_timer = 0
-    font = pygame.font.Font(FONT_NAME, 32)
-
-    # containers
-    grid = [[None for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
-    slots = [None for _ in range(2 * SLOTS_PER_SIDE)]
-
-    cell_rects = build_grid(width, height)
+    cell_rects: dict[tuple[int, int], pygame.Rect] = build_grid(width, height)
+    slot_rects: list[pygame.Rect]
+    check_button_rect: pygame.Rect
     slot_rects, check_button_rect = build_equation_bar(width, height, screen)
 
-    # === Load equation set and extract terms from JSON ===
-    # change file name to the one you actually want to load
-    equation_set = EquationSet.from_json(JSON_DIR / "standard_set.json")
-    all_terms = equation_set.all_terms
+    draggable_terms: list[DraggableTerm] = []
+
+    # Load equation set and extract terms from JSON
+    # Change file name to the one you actually want to load
+    equation_set: EquationSet = EquationSet.from_json(JSON_DIR / "standard_set.json")
+    all_terms: list[Term] = equation_set.all_terms
 
     # Randomly distribute terms into grid cells
-    available_positions = list(cell_rects.keys())
+    available_positions: list[tuple[int, int]] = list(cell_rects.keys())
     random.shuffle(available_positions)
 
-    draggable_terms = []
     for term, pos in zip(all_terms, available_positions):
         rect = cell_rects[pos]
         dt = DraggableTerm(term, pos, rect, "grid", width)
         grid[pos[0]][pos[1]] = dt
         draggable_terms.append(dt)
     # Note: If there are more terms than cells, some terms will not be placed.
+
+    # Main loop
     while running:
         clock.tick(FPS)
         for event in pygame.event.get():
@@ -302,19 +81,16 @@ def main() -> None:
                 screen = pygame.display.set_mode((width, height), pygame.RESIZABLE)
                 cell_rects = build_grid(width, height)
 
-                # re-center terms in their current positions
+                # Re-center terms in their current positions
                 for dt in draggable_terms:
                     if dt.container == "grid":
                         rect = cell_rects[dt.pos_key]
-                    else:
-                        # slots are rebuilt during draw
-                        continue
-                    dt.rect.center = rect.center
-                    dt.origin_rect = rect
+                        dt.rect.center = rect.center
+                        dt.origin_rect = rect
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if check_button_rect.collidepoint(event.pos):
-                    # --- Collect terms from slots ---
+                    # Collect terms from slots
                     left_terms = [
                         slots[i].term for i in range(SLOTS_PER_SIDE) if slots[i]
                     ]
@@ -324,8 +100,7 @@ def main() -> None:
                         if slots[i]
                     ]
 
-                    # --- Check against equations in set ---
-                    correct = False
+                    # Check against equations in set
 
                     left_codes = sorted([t.latex_code for t in left_terms])
                     right_codes = sorted([t.latex_code for t in right_terms])
@@ -340,7 +115,7 @@ def main() -> None:
                         ):
                             correct = True
                             break
-                    # --- after checking for correct equation ---
+
                     if correct:
                         feedback_message = "Correct!"
                         # Remove terms used in the equation
@@ -348,9 +123,9 @@ def main() -> None:
                         for dt in used_terms:
                             if dt in draggable_terms:
                                 draggable_terms.remove(dt)
+                        # Clear slots
                         slots = [None for _ in range(len(slots))]
 
-                        # If no draggable terms left -> show final message
                         if not draggable_terms:
                             feedback_message = "Great, you know it all!"
                     else:
@@ -359,14 +134,14 @@ def main() -> None:
                         for i, dt in enumerate(slots):
                             if dt:
                                 if dt.origin_container == "grid":
-                                    # return to original grid cell
+                                    # Return to original grid cell
                                     r, c = dt.origin_key
                                     dt.pos_key = (r, c)
                                     dt.rect.center = dt.origin_rect.center
                                     dt.container = "grid"
                                     grid[r][c] = dt
                                 else:
-                                    # fallback: place back into first free grid cell
+                                    # Fallback: place back into first free grid cell
                                     for (r, c), rect in cell_rects.items():
                                         if grid[r][c] is None:
                                             dt.pos_key = (r, c)
@@ -386,14 +161,14 @@ def main() -> None:
         screen.fill(WHITE)
         draw_background(screen, width, height)
         draw_quit_button(screen, width)
-        # draw grid
+        # Draw grid
         for (r, c), rect in cell_rects.items():
-            if grid[r][c]:  # term on grid position, draw white background rectangle
+            if grid[r][c]:  # Term on grid position, draw white background rectangle
                 pygame.draw.rect(screen, WHITE, rect, border_radius=4)
-        # equation bar (rebuild each frame)
+        # Equation bar (rebuild each frame)
         slot_rects, check_button_rect = build_equation_bar(width, height, screen)
 
-        # re-center slot terms on resize
+        # Re-center slot terms on resize
         for idx, dt in enumerate(slots):
             if dt:
                 dt.rect.center = slot_rects[idx].center
